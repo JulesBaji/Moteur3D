@@ -79,6 +79,7 @@ namespace M3D_ISICG
 		locLum = glGetUniformLocation( program, "luminosite" );
 		// Matrice model view projection
 		MVP = glGetUniformLocation( program, "uMVPMatrix" );
+		// Matrice normale
 		normalMatrix = glGetUniformLocation( program, "normalMatrix" );
 
 		// Initialisation luminosite et couleur
@@ -101,7 +102,7 @@ namespace M3D_ISICG
 
 	void LabWork4::render()
 	{ 
-		Mat4f normalMat = glm::transpose( glm::inverse( _camera.getViewMatrix() * MAT4F_ID ) );
+		Mat4f normalMat = glm::transpose( glm::inverse( _camera.getViewMatrix() ) );
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
 		bunny.render( program );
