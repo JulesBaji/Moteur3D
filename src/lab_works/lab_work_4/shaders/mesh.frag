@@ -2,9 +2,16 @@
 
 layout( location = 0 ) out vec4 fragColor;
 
-uniform vec3 ambient, diffuse, shininess;
+in vec3 normal, L;
+
+uniform vec3 ambient, diffuse, shininess, directionLum;
 
 void main()
 {
-	fragColor = vec4( ambient, 1.0f );
+
+	float theta = acos(dot(normal, L));
+
+    vec3 couleurDiffuse = diffuse * cos(theta);
+
+	fragColor = vec4( ambient + couleurDiffuse, 1.0f );
 }
