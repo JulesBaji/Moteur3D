@@ -31,8 +31,11 @@ namespace M3D_ISICG
 		glProgramUniform3fv(
 			p_glProgram, glGetUniformLocation( p_glProgram, "diffuse" ), 1, glm::value_ptr( _material._diffuse ) );		
 		// je me rappelle une fois g vu 1 ratata shiny il etait cheum de zinzin
-		glProgramUniform3fv(
+		glProgramUniform1fv(
 			p_glProgram, glGetUniformLocation( p_glProgram, "shininess" ), 1, &_material._shininess );
+		// Lumière spéculaire
+		glProgramUniform3fv(
+			p_glProgram, glGetUniformLocation( p_glProgram, "specular" ), 1, value_ptr( _material._specular ) );
 		glDrawElements( GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0 );
 		glBindVertexArray( 0 );
 	}

@@ -79,9 +79,10 @@ namespace M3D_ISICG
 		locLum = glGetUniformLocation( program, "luminosite" );
 		// Matrice model view projection
 		MVP = glGetUniformLocation( program, "uMVPMatrix" );
+		// Matrice model view projection
+		ModelMatrix = glGetUniformLocation( program, "uMMatrix" );
 		// Matrice normale
 		normalMatrix = glGetUniformLocation( program, "normalMatrix" );
-
 		// Initialisation luminosite et couleur
 		glProgramUniform1f( program, locLum, luminosite );
 		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
@@ -97,13 +98,16 @@ namespace M3D_ISICG
 		_updateViewMatrix();
 		_updateProjMatrix();
 		MVPMatrix = _camera.getProjectionMatrix() * _camera.getViewMatrix();
+		MMatrix = _camera.getViewMatrix();
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
+		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
 	}
 
 	void LabWork4::render()
 	{ 
 		Mat4f normalMat = glm::transpose( glm::inverse( _camera.getViewMatrix() ) );
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
+		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
 		bunny.render( program );
 	}
