@@ -23,14 +23,13 @@ namespace M3D_ISICG
 	{
 		glBindVertexArray( _vao );
 		glEnable( GL_DEPTH_TEST );
-		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		// ambiance sa gwan mew
+		// lumière ambiante
 		glProgramUniform3fv( 
 			p_glProgram, glGetUniformLocation( p_glProgram, "ambient" ), 1, glm::value_ptr( _material._ambient ) );
-		// diffusing da bomb
+		// lumière diffuse
 		glProgramUniform3fv(
 			p_glProgram, glGetUniformLocation( p_glProgram, "diffuse" ), 1, glm::value_ptr( _material._diffuse ) );		
-		// je me rappelle une fois g vu 1 ratata shiny il etait cheum de zinzin
+		// lumière qui brille
 		glProgramUniform1fv(
 			p_glProgram, glGetUniformLocation( p_glProgram, "shininess" ), 1, &_material._shininess );
 		// Lumière spéculaire
