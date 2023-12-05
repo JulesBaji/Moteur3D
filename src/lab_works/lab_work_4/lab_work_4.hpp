@@ -54,7 +54,7 @@ namespace M3D_ISICG
 		Mat4f			  mMatrix			 = MAT4F_ID;
 		Mat4f			  MVMatrix			 = MAT4F_ID;
 		TriangleMeshModel bunny;
-		Vec3f			  posLumiere	= Vec3f( 1.5f, 1.5f, -0.3f );
+		Vec3f			  posLumiere = Vec3f( 1.5f / 0.003f, 1.5f / 0.003f, -0.3f / 0.003f );
 		// ================
 		static const std::string _shaderFolder;
 	};
