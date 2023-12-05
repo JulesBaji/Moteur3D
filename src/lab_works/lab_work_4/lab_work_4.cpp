@@ -70,7 +70,7 @@ namespace M3D_ISICG
 		glDeleteShader( fragmentShader );
 		glDeleteShader( vertexShader );
 
-		bunny.load( "Bunny", "data/models/bunny.obj" );
+		bunny.load( "Bunny", "data/models/conference.obj" );
 
 		glUseProgram( program );
 
@@ -80,12 +80,18 @@ namespace M3D_ISICG
 		// Matrice model view projection
 		MVP = glGetUniformLocation( program, "uMVPMatrix" );
 		// Matrice model view projection
-		ModelMatrix = glGetUniformLocation( program, "uMMatrix" );
+		MV = glGetUniformLocation( program, "uMVMatrix" );
 		// Matrice normale
 		normalMatrix = glGetUniformLocation( program, "normalMatrix" );
+		// Position lumiere
+		posLumt = glGetUniformLocation( program, "posLum" );
 		// Initialisation luminosite et couleur
 		glProgramUniform1f( program, locLum, luminosite );
 		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
+		// Initialisation Matrice modèle
+		mMatrix = glm::scale( MAT4F_ID, glm::vec3( 0.003f ) );
+		// Initialisation position lumière
+		glProgramUniform3fv( program, posLumt, 3, glm::value_ptr( posLumiere ) );
 
 		_initCamera();
 
@@ -95,19 +101,18 @@ namespace M3D_ISICG
 
 	void LabWork4::animate( const float p_deltaTime ) 
 	{
-		_updateViewMatrix();
-		_updateProjMatrix();
-		MVPMatrix = _camera.getProjectionMatrix() * _camera.getViewMatrix();
-		MMatrix = _camera.getViewMatrix();
-		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
-		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
 	}
 
 	void LabWork4::render()
 	{ 
-		Mat4f normalMat = glm::transpose( glm::inverse( _camera.getViewMatrix() ) );
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		_updateViewMatrix();
+		_updateProjMatrix();
+		MVPMatrix		= _camera.getProjectionMatrix() * _camera.getViewMatrix() * mMatrix;
+		MVMatrix		= _camera.getViewMatrix() * mMatrix;
+		Mat4f normalMat = glm::transpose( glm::inverse( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
-		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
+		glProgramUniformMatrix4fv( program, MV, 1, 0, glm::value_ptr( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
 		bunny.render( program );
 	}
