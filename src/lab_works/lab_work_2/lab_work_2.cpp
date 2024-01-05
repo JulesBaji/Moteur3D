@@ -153,7 +153,7 @@ namespace M3D_ISICG
 
 	void LabWork2::displayUI()
 	{
-		ImGui::Begin( "Settings lab work 1" );
+		ImGui::Begin( "Settings lab work 2" );
 		ImGui::Text( "No setting available!" );
 		modificationLuminosite = ImGui::SliderFloat( "Slider", &luminosite, 0.0f, 1.0f );			
 		modificationFond = ImGui::ColorEdit3( "Couleur Fond", glm::value_ptr( _bgColor ) );

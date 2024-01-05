@@ -175,14 +175,6 @@
     <ClInclude Include="src\lab_works\lab_work_4\lab_work_4.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\lab_works\lab_work_1\shaders\lw1.frag">
-      <Filter>Source Files\lab_works\lab_work_1\shaders</Filter>
-    </None>
-    <None Include="src\lab_works\lab_work_1\shaders\lw1.vert">
-      <Filter>Source Files\lab_works\lab_work_1\shaders</Filter>
-    </None>
-    <None Include="src\lab_works\lab_work_2\shaders\lw1.frag" />
-    <None Include="src\lab_works\lab_work_2\shaders\lw1.vert" />
     <None Include="x64\Debug\M3D_ISICG.tlog\CL.command.1.tlog" />
     <None Include="x64\Debug\M3D_ISICG.tlog\CL.read.1.tlog" />
     <None Include="x64\Debug\M3D_ISICG.tlog\CL.write.1.tlog" />
@@ -201,8 +193,6 @@
     <None Include="x64\Debug\vc142.pdb" />
     <None Include=".clang-format" />
     <None Include=".gitignore" />
-    <None Include="src\lab_works\lab_work_3\shaders\lw1.frag" />
-    <None Include="src\lab_works\lab_work_3\shaders\lw1.vert" />
     <None Include="x64\Debug\M3D_ISICG.exe" />
     <None Include="x64\Debug\assimp-vc142-mt.dll" />
     <None Include="x64\Debug\M3D_ISICG.exe.recipe" />
@@ -212,8 +202,6 @@
     <None Include="x64\Debug\vc143.pdb" />
     <None Include="x64\Debug\zlib1.dll" />
     <None Include="imgui.ini" />
-    <None Include="src\lab_works\lab_work_4\shaders\mesh.frag" />
-    <None Include="src\lab_works\lab_work_4\shaders\mesh.vert" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="x64\Debug\application.obj" />
