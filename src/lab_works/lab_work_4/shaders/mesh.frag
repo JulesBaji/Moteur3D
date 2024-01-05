@@ -10,7 +10,7 @@ uniform float shininess;
 void main()
 {
 	vec3 lightDir  = normalize( lightPos - fragPos);
-	vec3 viewDir = normalize(-fragPos);
+	vec3 viewDir = normalize(- fragPos);
 	vec3 N = normalize(normal);	
 	if(dot(N, lightDir) < 0)
         N = -N;
