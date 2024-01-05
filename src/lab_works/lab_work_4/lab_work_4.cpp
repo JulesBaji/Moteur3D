@@ -70,22 +70,16 @@ namespace M3D_ISICG
 		glDeleteShader( fragmentShader );
 		glDeleteShader( vertexShader );
 
-		bunny.load( "Bunny", "data/models/bunny.obj" );
+		bunny.load( "Conference", "data/models/conference/conference.obj" );
 
 		glUseProgram( program );
 
-		// Dans la fonction init, recuperez l'adresse de cette variable via la fonction glGetUniformLocation et
-		// stockez-la comme attribut de la classe LabWork4.
-		locLum = glGetUniformLocation( program, "luminosite" );
 		// Matrice model view projection
 		MVP = glGetUniformLocation( program, "uMVPMatrix" );
-		// Matrice model view projection
-		ModelMatrix = glGetUniformLocation( program, "uMMatrix" );
+		// Matrice model
+		viewMatrix = glGetUniformLocation( program, "uVMatrix" );
 		// Matrice normale
 		normalMatrix = glGetUniformLocation( program, "normalMatrix" );
-		// Initialisation luminosite et couleur
-		glProgramUniform1f( program, locLum, luminosite );
-		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 
 		_initCamera();
 
@@ -93,21 +87,19 @@ namespace M3D_ISICG
 		return true;
 	}
 
+	// Demander la difference entre render et animate pour les maj d'affichage
 	void LabWork4::animate( const float p_deltaTime ) 
 	{
 		_updateViewMatrix();
 		_updateProjMatrix();
-		MVPMatrix = _camera.getProjectionMatrix() * _camera.getViewMatrix();
-		MMatrix = _camera.getViewMatrix();
-		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
-		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
+		MVPMatrix = _camera.getProjectionMatrix() * _camera.getViewMatrix() * glm::scale( MAT4F_ID, glm::vec3( 0.003f ) );;
+		//glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
 	}
 
 	void LabWork4::render()
 	{ 
 		Mat4f normalMat = glm::transpose( glm::inverse( _camera.getViewMatrix() ) );
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
-		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
 		bunny.render( program );
 	}
@@ -157,12 +149,8 @@ namespace M3D_ISICG
 
 	void LabWork4::displayUI()
 	{
-		ImGui::Begin( "Settings lab work 1" );
+		ImGui::Begin( "Settings lab work 4" );
 		ImGui::Text( "No setting available!" );
-		if ( ImGui::SliderFloat( "Couleur Cube", &luminosite, 0.0f, 1.0f ) )
-			glProgramUniform1f( program, locLum, luminosite );
-		if ( ImGui::ColorEdit3( "Couleur Fond", glm::value_ptr( _bgColor ) ) )
-			glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 		if ( ImGui::SliderFloat( "fovy", &fovy, 60.0f, 120.0f ) )
 			_camera.setFovy( fovy );
 		ImGui::End();

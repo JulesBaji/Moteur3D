@@ -67,18 +67,6 @@
     <None Include=".clang-format" />
     <None Include=".gitignore" />
     <None Include="imgui.ini" />
-    <None Include="src\lab_works\lab_work_1\shaders\lw1.frag" />
-    <None Include="src\lab_works\lab_work_1\shaders\lw1.vert" />
-    <None Include="src\lab_works\lab_work_2\shaders\lw1.frag" />
-    <None Include="src\lab_works\lab_work_2\shaders\lw1.vert" />
-    <None Include="src\lab_works\lab_work_3\shaders\lw1.frag" />
-    <None Include="src\lab_works\lab_work_3\shaders\lw1.vert" />
-    <None Include="src\lab_works\lab_work_4\shaders\mesh.frag">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="src\lab_works\lab_work_4\shaders\mesh.vert">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
     <None Include="x64\Debug\assimp-vc142-mt.dll" />
     <None Include="x64\Debug\M3D_ISICG.exe" />
     <None Include="x64\Debug\M3D_ISICG.exe.recipe" />

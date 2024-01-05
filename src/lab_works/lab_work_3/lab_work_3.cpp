@@ -203,7 +203,7 @@ namespace M3D_ISICG
 
 	void LabWork3::displayUI()
 	{
-		ImGui::Begin( "Settings lab work 1" );
+		ImGui::Begin( "Settings lab work 3" );
 		ImGui::Text( "No setting available!" );
 		if ( ImGui::SliderFloat( "Couleur Cube", &luminosite, 0.0f, 1.0f ) )
 			glProgramUniform1f( program, locLum, luminosite );
