@@ -80,7 +80,7 @@ namespace M3D_ISICG
 
 	void Camera::_computeViewMatrix()
 	{ 
-		_viewMatrix = glm::lookAt( _position, -	_invDirection, _up );
+		_viewMatrix = glm::lookAt( _position, _position - _invDirection, _up );
 	}
 
 	void Camera::_computeProjectionMatrix()

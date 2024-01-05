@@ -42,6 +42,7 @@ namespace M3D_ISICG
 		float _yaw	 = 90.f;
 		float _pitch = 0.f;
 
+
 		int	  _screenWidth	= 1280;
 		int	  _screenHeight = 720;
 		float _aspectRatio	= float( _screenWidth ) / _screenHeight;
