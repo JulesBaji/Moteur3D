@@ -103,7 +103,12 @@ namespace M3D_ISICG
 
 	void LabWork4::render()
 	{ 
-		Mat4f normalMat = glm::transpose( glm::inverse( _camera.getViewMatrix() ) );
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		_updateViewMatrix();
+		_updateProjMatrix();
+		MVPMatrix		= _camera.getProjectionMatrix() * _camera.getViewMatrix() * mMatrix;
+		MVMatrix		= _camera.getViewMatrix() * mMatrix;
+		Mat4f normalMat = glm::transpose( glm::inverse( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
 		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
