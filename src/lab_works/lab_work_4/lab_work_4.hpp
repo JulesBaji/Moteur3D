@@ -34,7 +34,9 @@ namespace M3D_ISICG
 		// ================ GL data.
 		GLuint			   program = GL_INVALID_INDEX;	
 		GLint			   MVP = GL_INVALID_INDEX;
+		GLint			   ModelMatrix		  = GL_INVALID_INDEX;
 		GLint			   normalMatrix			  = GL_INVALID_INDEX;
+		GLint			   modelMatrix	  = GL_INVALID_INDEX;
 		GLint			   viewMatrix = GL_INVALID_INDEX;
 		GLint			   projMatrix	  = GL_INVALID_INDEX;
 		// ================
@@ -47,7 +49,9 @@ namespace M3D_ISICG
 		float _cameraSpeed		 = 0.1f;
 		float _cameraSensitivity = 0.1f;
 		Mat4f MVPMatrix			 = MAT4F_ID;
+		Mat4f			  MMatrix			 = MAT4F_ID;
 		TriangleMeshModel bunny;
+		Vec3f			  posLumiere = Vec3f( 1.5f / 0.003f, 1.5f / 0.003f, -0.3f / 0.003f );
 		// ================
 		static const std::string _shaderFolder;
 	};

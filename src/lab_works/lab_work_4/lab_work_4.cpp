@@ -70,16 +70,19 @@ namespace M3D_ISICG
 		glDeleteShader( fragmentShader );
 		glDeleteShader( vertexShader );
 
-		bunny.load( "Conference", "data/models/conference/conference.obj" );
+		bunny.load( "Bunny", "data/models/bunny.obj" );
 
 		glUseProgram( program );
 
 		// Matrice model view projection
 		MVP = glGetUniformLocation( program, "uMVPMatrix" );
-		// Matrice model
-		viewMatrix = glGetUniformLocation( program, "uVMatrix" );
+		// Matrice model view projection
+		ModelMatrix = glGetUniformLocation( program, "uMMatrix" );
 		// Matrice normale
 		normalMatrix = glGetUniformLocation( program, "normalMatrix" );
+		// Initialisation luminosite et couleur
+		glProgramUniform1f( program, locLum, luminosite );
+		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 
 		_initCamera();
 
@@ -92,14 +95,22 @@ namespace M3D_ISICG
 	{
 		_updateViewMatrix();
 		_updateProjMatrix();
-		MVPMatrix = _camera.getProjectionMatrix() * _camera.getViewMatrix() * glm::scale( MAT4F_ID, glm::vec3( 0.003f ) );;
-		//glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
+		MVPMatrix = _camera.getProjectionMatrix() * _camera.getViewMatrix();
+		MMatrix = _camera.getViewMatrix();
+		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
+		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
 	}
 
 	void LabWork4::render()
 	{ 
-		Mat4f normalMat = glm::transpose( glm::inverse( _camera.getViewMatrix() ) );
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		_updateViewMatrix();
+		_updateProjMatrix();
+		MVPMatrix		= _camera.getProjectionMatrix() * _camera.getViewMatrix() * mMatrix;
+		MVMatrix		= _camera.getViewMatrix() * mMatrix;
+		Mat4f normalMat = glm::transpose( glm::inverse( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
+		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
 		bunny.render( program );
 	}
