@@ -35,6 +35,47 @@ namespace M3D_ISICG
 		// Lumière spéculaire
 		glProgramUniform3fv(
 			p_glProgram, glGetUniformLocation( p_glProgram, "specular" ), 1, value_ptr( _material._specular ) );
+
+		// texture ambiante
+		glProgramUniform1i(
+			p_glProgram, glGetUniformLocation( p_glProgram, "uHasAmbiantMap" ), _material._hasAmbientMap );
+		if ( _material._hasAmbientMap )
+		{
+			glBindTextureUnit( 0, _material._ambientMap._id );
+		}
+
+		// texture diffuse
+		glProgramUniform1i(
+			p_glProgram, glGetUniformLocation( p_glProgram, "uHasDiffuseMap" ), _material._hasDiffuseMap );
+		if ( _material._hasDiffuseMap )
+		{
+			glBindTextureUnit( 1, _material._diffuseMap._id );
+		}
+
+		// texture brillante
+		glProgramUniform1i(
+			p_glProgram, glGetUniformLocation( p_glProgram, "uHasShininessMap" ), _material._hasShininessMap );
+		if ( _material._hasShininessMap )
+		{
+			glBindTextureUnit( 2, _material._shininessMap._id );
+		}
+
+		// texture spéculaire
+		glProgramUniform1i(
+			p_glProgram, glGetUniformLocation( p_glProgram, "uHasSpecularMap" ), _material._hasSpecularMap );
+		if ( _material._hasSpecularMap )
+		{
+			glBindTextureUnit( 3, _material._specularMap._id );
+		}
+
+		// texture normales
+		glProgramUniform1i(
+			p_glProgram, glGetUniformLocation( p_glProgram, "uHasNormalMap" ), _material._hasNormalMap );
+		if ( _material._hasNormalMap )
+		{
+			glBindTextureUnit( 4, _material._normalMap._id );
+		}
+
 		glDrawElements( GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0 );
 		glBindVertexArray( 0 );
 	}

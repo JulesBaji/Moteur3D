@@ -218,6 +218,19 @@ namespace M3D_ISICG
 
 		// =====================================================
 
+		// ===================================================== NORMALS
+		if ( p_mtl->GetTextureCount( aiTextureType_NORMALS ) > 0 ) // Texture ?
+		{
+			p_mtl->GetTexture( aiTextureType_NORMALS, 0, &texturePath );
+			texture = _loadTexture( texturePath, "normal" );
+			if ( texture._id != GL_INVALID_INDEX )
+			{
+				material._normalMap	= texture;
+				material._hasNormalMap = true;
+			}
+		}
+		// =====================================================
+
 		return material;
 	}
 
@@ -289,16 +302,20 @@ namespace M3D_ISICG
 				internalFormat = GL_RGBA32F;
 			}
 
+			// Niveau de mipmap
+			int mipmapLevels = std::floor( std::log2( std::max( image._width, image._height ) ) );
+
 			// Setup the texture format.
-			glTextureStorage2D( texture._id, 1, internalFormat, image._width, image._height );
+			glTextureStorage2D( texture._id, mipmapLevels, internalFormat, image._width, image._height );
 			glTextureParameteri( texture._id, GL_TEXTURE_WRAP_S, GL_REPEAT );
 			glTextureParameteri( texture._id, GL_TEXTURE_WRAP_T, GL_REPEAT );
-			glTextureParameteri( texture._id, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-			glTextureParameteri( texture._id, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+			glTextureParameteri( texture._id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+			glTextureParameteri( texture._id, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
 			// Fill the texture.
 			glTextureSubImage2D(
 				texture._id, 0, 0, 0, image._width, image._height, format, GL_UNSIGNED_BYTE, image._pixels );
+			glGenerateTextureMipmap( texture._id );
 		}
 
 		// Save loaded texture.
