@@ -74,15 +74,22 @@ namespace M3D_ISICG
 
 		glUseProgram( program );
 
+		// Dans la fonction init, recuperez l'adresse de cette variable via la fonction glGetUniformLocation et
+		// stockez-la comme attribut de la classe LabWork5.
+		locLum = glGetUniformLocation( program, "luminosite" );
 		// Matrice model view projection
 		MVP = glGetUniformLocation( program, "uMVPMatrix" );
-		// Matrice model view projection
-		ModelMatrix = glGetUniformLocation( program, "uMMatrix" );
+		// Matrice model view
+		MV = glGetUniformLocation( program, "uMVMatrix" );
 		// Matrice normale
 		normalMatrix = glGetUniformLocation( program, "normalMatrix" );
+		// position de la lumière
+		lightPos = glGetUniformLocation( program, "lightPos" );
 		// Initialisation luminosite et couleur
 		glProgramUniform1f( program, locLum, luminosite );
 		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
+		// Initialisation Matrice modèle
+		mMatrix = glm::scale( MAT4F_ID, glm::vec3( 0.003f ) );
 
 		_initCamera();
 
@@ -93,12 +100,6 @@ namespace M3D_ISICG
 	// Demander la difference entre render et animate pour les maj d'affichage
 	void LabWork4::animate( const float p_deltaTime ) 
 	{
-		_updateViewMatrix();
-		_updateProjMatrix();
-		MVPMatrix = _camera.getProjectionMatrix() * _camera.getViewMatrix();
-		MMatrix = _camera.getViewMatrix();
-		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
-		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
 	}
 
 	void LabWork4::render()
@@ -110,8 +111,9 @@ namespace M3D_ISICG
 		MVMatrix		= _camera.getViewMatrix() * mMatrix;
 		Mat4f normalMat = glm::transpose( glm::inverse( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
-		glProgramUniformMatrix4fv( program, ModelMatrix, 1, 0, glm::value_ptr( MMatrix ) );
+		glProgramUniformMatrix4fv( program, MV, 1, 0, glm::value_ptr( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
+		glProgramUniform3fv( program, lightPos, 1, glm::value_ptr( VEC3F_ZERO ) );
 		bunny.render( program );
 	}
 

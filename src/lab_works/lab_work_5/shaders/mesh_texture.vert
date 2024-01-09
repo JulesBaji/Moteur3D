@@ -11,8 +11,7 @@ out vec2 texCoords;
 
 uniform mat4 uMVPMatrix; //  Model * View * Projection
 uniform mat4 uMVMatrix; // Model * View
-uniform mat4 uMMatrix; // Model
-uniform mat4 normalMatrix;
+uniform mat4 uNormalMatrix;
 
 out VS_OUT {
 	vec3 Ptangent;
@@ -22,10 +21,10 @@ out VS_OUT {
 void main()
 {
     gl_Position = uMVPMatrix * vec4( aVertexPosition, 1.f );
-    normal = vec3( normalMatrix * vec4(aVertexNormal, 1.f));
+    normal = vec3( uNormalMatrix * vec4(aVertexNormal, 1.f));
     fragPos = vec3( uMVMatrix * vec4(aVertexPosition, 1.f));
     texCoords = aVertexTexCoords;
-	vec3 T			 = normalize( vec3( normalMatrix * vec4( aVertexTangent, 1.f ) ) );
+	vec3 T			 = normalize( vec3( uNormalMatrix * vec4( aVertexTangent, 1.f ) ) );
 	vec3 N			 = normalize( normal );
 	T				 = normalize( T - dot( T, N ) * N ); // On veut T orthogonal a N
 	vec3 B			 = cross( N, T );

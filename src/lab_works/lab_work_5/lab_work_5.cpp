@@ -81,10 +81,8 @@ namespace M3D_ISICG
 		MVP = glGetUniformLocation( program, "uMVPMatrix" );
 		// Matrice model view
 		MV = glGetUniformLocation( program, "uMVMatrix" );
-		// Matrice model
-		MV = glGetUniformLocation( program, "uMMatrix" );
 		// Matrice normale
-		normalMatrix = glGetUniformLocation( program, "normalMatrix" );
+		normalMatrix = glGetUniformLocation( program, "uNormalMatrix" );
 		// position de la lumière
 		lightPos = glGetUniformLocation( program, "lightPos" );
 		// Initialisation luminosite et couleur
@@ -113,7 +111,6 @@ namespace M3D_ISICG
 		Mat4f normalMat = glm::transpose( glm::inverse( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
 		glProgramUniformMatrix4fv( program, MV, 1, 0, glm::value_ptr( MVMatrix ) );
-		glProgramUniformMatrix4fv( program, M, 1, 0, glm::value_ptr( mMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
 		glProgramUniform3fv( program, lightPos, 1, glm::value_ptr(VEC3F_ZERO) );
 		bunny.render( program );
