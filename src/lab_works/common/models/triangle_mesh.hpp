@@ -29,17 +29,20 @@ namespace M3D_ISICG
 		Vec3f _ambient	 = VEC3F_ZERO;
 		Vec3f _diffuse	 = VEC3F_ZERO;
 		Vec3f _specular	 = VEC3F_ZERO;
+		Vec3f _normal	 = VEC3F_ZERO;
 		float _shininess = 0.f;
 
 		bool _hasAmbientMap	  = false;
 		bool _hasDiffuseMap	  = false;
 		bool _hasSpecularMap  = false;
 		bool _hasShininessMap = false;
+		bool _hasNormalMap  = false;
 
 		Texture _ambientMap;
 		Texture _diffuseMap;
 		Texture _specularMap;
 		Texture _shininessMap;
+		Texture _normalMap;
 	};
 
 	class TriangleMesh

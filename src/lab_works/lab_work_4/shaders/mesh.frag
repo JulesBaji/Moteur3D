@@ -4,13 +4,13 @@ layout( location = 0 ) out vec4 fragColor;
 
 in vec3 normal, fragPos;
 
-uniform vec3 ambient, diffuse, specular, lightPos;
+uniform vec3 ambient, diffuse, specular;
 uniform float shininess;
 
 void main()
 {
-	vec3 lightDir  = normalize( lightPos - fragPos);
-	vec3 viewDir = normalize(- fragPos);
+	vec3 lightDir  = normalize(- fragPos);
+	vec3 viewDir = normalize(-fragPos);
 	vec3 N = normalize(normal);	
 	if(dot(N, lightDir) < 0)
         N = -N;
