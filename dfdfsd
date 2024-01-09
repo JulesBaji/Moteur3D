@@ -1,0 +1,12 @@
+[33mf64deef[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: revert: Revert "TP fini ?"
+[33m3c5c3e9[m HEAD@{1}: reset: moving to 3c5c3e9045515d169be90c89bccc92c4efa24b64
+[33m3c5c3e9[m HEAD@{2}: pull: Fast-forward
+[33m74c2bf5[m HEAD@{3}: reset: moving to HEAD^
+[33m4568254[m HEAD@{4}: reset: moving to HEAD^
+[33mfddcaf7[m HEAD@{5}: reset: moving to HEAD^
+[33m0cd05b8[m HEAD@{6}: reset: moving to HEAD^
+[33m3c5c3e9[m HEAD@{7}: pull --progress --no-edit --no-stat --recurse-submodules=no origin: Fast-forward
+[33m53c1afe[m HEAD@{8}: commit: sa va ou koi
+[33mccaa472[m HEAD@{9}: commit: TP fini ?
+[33m94f9dd7[m HEAD@{10}: commit: specular
+[33m29fab2b[m HEAD@{11}: clone: from https://github.com/JulesBaji/M3D_ISICG

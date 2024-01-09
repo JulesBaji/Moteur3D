@@ -36,6 +36,7 @@
     <ClCompile Include="src\lab_works\lab_work_2\lab_work_2.hpp" />
     <ClCompile Include="src\lab_works\lab_work_3\lab_work_3.cpp" />
     <ClCompile Include="src\lab_works\lab_work_4\lab_work_4.cpp" />
+    <ClCompile Include="src\lab_works\lab_work_5\lab_work_5.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\utils\image.cpp" />
   </ItemGroup>
@@ -57,6 +58,7 @@
     <ClInclude Include="src\lab_works\lab_work_1\lab_work_1.hpp" />
     <ClInclude Include="src\lab_works\lab_work_3\lab_work_3.hpp" />
     <ClInclude Include="src\lab_works\lab_work_4\lab_work_4.hpp" />
+    <ClInclude Include="src\lab_works\lab_work_5\lab_work_5.hpp" />
     <ClInclude Include="src\utils\file_path.hpp" />
     <ClInclude Include="src\utils\gl_utils.hpp" />
     <ClInclude Include="src\utils\image.hpp" />
@@ -79,6 +81,8 @@
     <None Include="src\lab_works\lab_work_4\shaders\mesh.vert">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="src\lab_works\lab_work_5\shaders\mesh_texture.frag" />
+    <None Include="src\lab_works\lab_work_5\shaders\mesh_texture.vert" />
     <None Include="x64\Debug\assimp-vc142-mt.dll" />
     <None Include="x64\Debug\M3D_ISICG.exe" />
     <None Include="x64\Debug\M3D_ISICG.exe.recipe" />

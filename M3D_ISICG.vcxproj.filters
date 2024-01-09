@@ -109,6 +109,9 @@
     <ClCompile Include="src\lab_works\lab_work_4\lab_work_4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\lab_works\lab_work_5\lab_work_5.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\application.hpp">
@@ -173,6 +176,7 @@
     </ClInclude>
     <ClInclude Include="src\lab_works\lab_work_3\lab_work_3.hpp" />
     <ClInclude Include="src\lab_works\lab_work_4\lab_work_4.hpp" />
+    <ClInclude Include="src\lab_works\lab_work_5\lab_work_5.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\lab_works\lab_work_1\shaders\lw1.frag">
@@ -214,6 +218,8 @@
     <None Include="imgui.ini" />
     <None Include="src\lab_works\lab_work_4\shaders\mesh.frag" />
     <None Include="src\lab_works\lab_work_4\shaders\mesh.vert" />
+    <None Include="src\lab_works\lab_work_5\shaders\mesh_texture.frag" />
+    <None Include="src\lab_works\lab_work_5\shaders\mesh_texture.vert" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="x64\Debug\application.obj" />
