@@ -70,7 +70,7 @@ namespace M3D_ISICG
 		glDeleteShader( fragmentShader );
 		glDeleteShader( vertexShader );
 
-		bunny.load( "Bunny", "data/models/bunny.obj" );
+		bunny.load( "Bunny", "data/models/conference/conference.obj" );
 
 		glUseProgram( program );
 
