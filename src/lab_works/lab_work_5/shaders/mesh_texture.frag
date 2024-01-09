@@ -62,9 +62,9 @@ void main()
 	}
 
 	vec3 lightDir, viewDir, N;
-	/*if ( uHasNormalMap )
+	if ( uHasNormalMap )
 	{
-		lightDir = normalize( fs_in.Ltangent - fs_in.Ptangent );
+		lightDir = normalize( - fs_in.Ptangent );
 		viewDir	 = normalize( -fs_in.Ptangent );
 		N		 = texture( uNormalMap, texCoords ).xyz;
 		N		 = normalize( N * 2.0 - 1.0 );
@@ -74,11 +74,11 @@ void main()
 		lightDir = normalize( lightPos - fragPos );
 		viewDir	 = normalize( -fragPos );
 		N		 = normalize( normal );
-	}*/
+	}
 
 	lightDir = normalize( lightPos - fragPos );
-	viewDir	 = normalize( -fragPos );
-	N		 = normalize( normal );
+		viewDir	 = normalize( -fragPos );
+		N		 = normalize( normal );
 
 	if ( dot( N, lightDir ) < 0 )
 		N = -N;

@@ -36,7 +36,6 @@ namespace M3D_ISICG
 		GLint			   locLum  = GL_INVALID_INDEX;	
 		GLint			   MVP = GL_INVALID_INDEX;
 		GLint			   MV					  = GL_INVALID_INDEX;
-		GLint			   M					  = GL_INVALID_INDEX;
 		GLint			   normalMatrix			  = GL_INVALID_INDEX;
 		GLint			   viewMatrix			  = GL_INVALID_INDEX;
 		GLint			   projMatrix			  = GL_INVALID_INDEX;
