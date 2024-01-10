@@ -1,5 +1,4 @@
 #include "triangle_mesh_model.hpp"
-#include "utils/image.hpp"
 #include <iostream>
 
 namespace M3D_ISICG
@@ -323,7 +322,7 @@ namespace M3D_ISICG
 			}
 
 			// Niveau de mipmap
-			int mipmapLevels = std::floor( std::log2( std::max( image._width, image._height ) ) );
+			GLint mipmapLevels = std::floor( std::log2( std::max( image._width, image._height ) ) );
 
 			// Setup the texture format.
 			glTextureStorage2D( texture._id, mipmapLevels, internalFormat, image._width, image._height );
@@ -347,4 +346,23 @@ namespace M3D_ISICG
 		return texture;
 	}
 
+	// TP6 : frameBuffer
+	void TriangleMeshModel::initGBuffer(Image image, Texture texture, GLint mipmapLevels)
+	{
+		GLuint fboId;
+		glCreateFramebuffers( 1, &fboId );
+
+		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
+								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };
+
+		glNamedFramebufferTexture( fboId, drawBuffers[ 0 ], texture._gBufferTextures[ 0 ], mipmapLevels );
+		glNamedFramebufferTexture( fboId, drawBuffers[ 1 ], texture._gBufferTextures[ 1 ], mipmapLevels );
+		glNamedFramebufferTexture( fboId, drawBuffers[ 2 ], texture._gBufferTextures[ 2 ], mipmapLevels );
+		glNamedFramebufferTexture( fboId, drawBuffers[ 3 ], texture._gBufferTextures[ 3 ], mipmapLevels );
+		glNamedFramebufferTexture( fboId, drawBuffers[ 4 ], texture._gBufferTextures[ 4 ], mipmapLevels );
+		glNamedFramebufferTexture( fboId, drawBuffers[ 5 ], texture._gBufferTextures[ 5 ], mipmapLevels );
+
+		glNamedFramebufferDrawBuffers( fboId, 6, drawBuffers );
+		glCheckNamedFramebufferStatus;
+	}
 } // namespace M3D_ISICG
