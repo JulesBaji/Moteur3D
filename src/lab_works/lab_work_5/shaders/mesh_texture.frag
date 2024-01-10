@@ -23,7 +23,18 @@ in VS_OUT {
 void main()
 {
 	vec3 ambientTexture, diffuseTexture, specularTexture, normalTexture;
-	float shininessTexture;
+	float shininessTexture, alphaDiffuseTexture;
+
+	if (uHasDiffuseMap) 
+	{
+		diffuseTexture = vec3(texture(uDiffuseMap, texCoords));
+		alphaDiffuseTexture = texture(uDiffuseMap, texCoords).w;
+		if (alphaDiffuseTexture <= 0.5) discard;
+	}
+	else
+	{
+		diffuseTexture = diffuse;
+	}
 
 	if (uHasAmbientMap) 
 	{
@@ -32,15 +43,6 @@ void main()
 	else
 	{
 		ambientTexture = ambient;
-	}
-
-	if (uHasDiffuseMap) 
-	{
-		diffuseTexture = vec3(texture(uDiffuseMap, texCoords));
-	}
-	else
-	{
-		diffuseTexture = diffuse;
 	}
 
 	if (uHasShininesseMap) 
@@ -76,10 +78,6 @@ void main()
 		N		 = normalize( normal );
 	}
 
-	lightDir = normalize( lightPos - fragPos );
-		viewDir	 = normalize( -fragPos );
-		N		 = normalize( normal );
-
 	if ( dot( N, lightDir ) < 0 )
 		N = -N;
 
@@ -87,5 +85,5 @@ void main()
 	vec3 diffuseColor = diffuseTexture * max( dot( N, lightDir ), 0.f );
 	vec3 specularColor = specularTexture * pow(max(dot(viewDir, reflectDir), 0.f), shininessTexture);
 
-	fragColor = vec4( ambientTexture + diffuseColor + specularColor, 1.f );
+	fragColor = vec4( ambientTexture + diffuseColor + specularColor, 1.0 );
 }
