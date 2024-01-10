@@ -1,5 +1,4 @@
 #include "triangle_mesh_model.hpp"
-#include "utils/image.hpp"
 #include <iostream>
 
 namespace M3D_ISICG
@@ -33,6 +32,14 @@ namespace M3D_ISICG
 			_loadMesh( scene->mMeshes[ i ], scene );
 		}
 		_meshes.shrink_to_fit();
+
+		std ::partition( _meshes.begin(),
+						 _meshes.end(),
+						 []( const TriangleMesh & p_mesh ) -> bool 
+						 { 
+							return p_mesh._material._isOpaque; 
+						 } 
+					  );
 
 		std::cout << "Done! "						//
 				  << _meshes.size() << " meshes, "	//
@@ -231,6 +238,18 @@ namespace M3D_ISICG
 		}
 		// =====================================================
 
+		// ===================================================== OPACITE
+		if ( p_mtl->GetTextureCount( aiTextureType_OPACITY ) > 0 ) // Texture ?
+		{
+			p_mtl->GetTexture( aiTextureType_OPACITY, 0, &texturePath );
+			texture = _loadTexture( texturePath, "opacity" );
+			if ( texture._id != GL_INVALID_INDEX )
+			{
+				material._isOpaque	   = false;
+			}
+		}
+		// =====================================================
+
 		return material;
 	}
 
@@ -303,7 +322,7 @@ namespace M3D_ISICG
 			}
 
 			// Niveau de mipmap
-			int mipmapLevels = std::floor( std::log2( std::max( image._width, image._height ) ) );
+			GLint mipmapLevels = std::floor( std::log2( std::max( image._width, image._height ) ) );
 
 			// Setup the texture format.
 			glTextureStorage2D( texture._id, mipmapLevels, internalFormat, image._width, image._height );
@@ -327,4 +346,23 @@ namespace M3D_ISICG
 		return texture;
 	}
 
+	// TP6 : frameBuffer
+	void TriangleMeshModel::initGBuffer(Image image, Texture texture, GLint mipmapLevels)
+	{
+		GLuint fboId;
+		glCreateFramebuffers( 1, &fboId );
+
+		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
+								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };
+
+		glNamedFramebufferTexture( fboId, drawBuffers[ 0 ], texture._gBufferTextures[ 0 ], mipmapLevels );
+		glNamedFramebufferTexture( fboId, drawBuffers[ 1 ], texture._gBufferTextures[ 1 ], mipmapLevels );
+		glNamedFramebufferTexture( fboId, drawBuffers[ 2 ], texture._gBufferTextures[ 2 ], mipmapLevels );
+		glNamedFramebufferTexture( fboId, drawBuffers[ 3 ], texture._gBufferTextures[ 3 ], mipmapLevels );
+		glNamedFramebufferTexture( fboId, drawBuffers[ 4 ], texture._gBufferTextures[ 4 ], mipmapLevels );
+		glNamedFramebufferTexture( fboId, drawBuffers[ 5 ], texture._gBufferTextures[ 5 ], mipmapLevels );
+
+		glNamedFramebufferDrawBuffers( fboId, 6, drawBuffers );
+		glCheckNamedFramebufferStatus;
+	}
 } // namespace M3D_ISICG
