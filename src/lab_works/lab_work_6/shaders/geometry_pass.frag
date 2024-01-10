@@ -1,6 +1,12 @@
 #version 450
 
-layout( location = 0 ) out vec4 fragColor;
+//layout( location = 0 ) out vec4 fragColor;
+layout( location = 0 ) out vec4 fragPosition;
+layout( location = 1 ) out vec4 fragNormal;
+layout( location = 2 ) out vec4 fragAmbient;
+layout( location = 3 ) out vec4 fragDiffuse;
+layout( location = 4 ) out vec4 fragSpecular;
+layout( location = 5 ) out vec4 fragDepth;
 
 layout( binding = 0 ) uniform sampler2D uAmbientMap;
 layout( binding = 1 ) uniform sampler2D uDiffuseMap;
@@ -22,7 +28,7 @@ in VS_OUT {
 
 void main()
 {
-	vec3 ambientTexture, diffuseTexture, specularTexture, normalTexture;
+	vec3 ambientTexture, diffuseTexture, specularTexture;
 	float shininessTexture, alphaDiffuseTexture;
 
 	if (uHasDiffuseMap) 
@@ -85,5 +91,11 @@ void main()
 	vec3 diffuseColor = diffuseTexture * max( dot( N, lightDir ), 0.f );
 	vec3 specularColor = specularTexture * pow(max(dot(viewDir, reflectDir), 0.f), shininessTexture);
 
-	fragColor = vec4( ambientTexture + diffuseColor + specularColor, 1.0 );
+	//fragColor = vec4( ambientTexture + diffuseColor + specularColor, 1.0f );
+	fragPosition = vec4( fragPos, 1.0f );
+	fragNormal = vec4( N, 1.0f );
+	fragAmbient = vec4( ambientTexture, 1.0f );
+	fragDiffuse = vec4( diffuseColor, 1.0f );
+	fragSpecular = vec4( specularColor, shininessTexture );
+	fragDepth = vec4( vec3(0,0,0), 1.0f );
 }

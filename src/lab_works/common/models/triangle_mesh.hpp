@@ -22,6 +22,7 @@ namespace M3D_ISICG
 		unsigned int _id;
 		std::string	 _type;
 		std::string	 _path;
+		std::vector<GLuint> _gBufferTextures;
 	};
 
 	struct Material
@@ -37,6 +38,7 @@ namespace M3D_ISICG
 		bool _hasSpecularMap  = false;
 		bool _hasShininessMap = false;
 		bool _hasNormalMap  = false;
+		bool _isOpaque		  = true;
 
 		Texture _ambientMap;
 		Texture _diffuseMap;

@@ -23,6 +23,8 @@ namespace M3D_ISICG
 	{
 		glBindVertexArray( _vao );
 		glEnable( GL_DEPTH_TEST );
+		//glEnable( GL_BLEND );
+		//glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		// lumière ambiante
 		glProgramUniform3fv( 
 			p_glProgram, glGetUniformLocation( p_glProgram, "ambient" ), 1, glm::value_ptr( _material._ambient ) );
@@ -78,6 +80,11 @@ namespace M3D_ISICG
 
 		glDrawElements( GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0 );
 		glBindVertexArray( 0 );
+		glBindTextureUnit( 0, 0 );
+		glBindTextureUnit( 1, 0 );
+		glBindTextureUnit( 2, 0 );
+		glBindTextureUnit( 3, 0 );
+		glBindTextureUnit( 4, 0 );
 	}
 
 	void TriangleMesh::cleanGL()

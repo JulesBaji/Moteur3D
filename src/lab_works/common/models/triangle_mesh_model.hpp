@@ -4,6 +4,7 @@
 #include "base_model.hpp"
 #include "triangle_mesh.hpp"
 #include "utils/file_path.hpp"
+#include "utils/image.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -23,6 +24,8 @@ namespace M3D_ISICG
 
 		void cleanGL() override;
 
+		void initGBuffer( Image image, Texture texture, GLint mipmapLevels );
+
 	  private:
 		void	 _loadMesh( const aiMesh * const p_mesh, const aiScene * const p_scene );
 		Material _loadMaterial( const aiMaterial * const p_mtl );
@@ -31,6 +34,7 @@ namespace M3D_ISICG
 	  public:
 		std::vector<TriangleMesh> _meshes;		   // A model can contain several meshes.
 		std::vector<Texture>	  _loadedTextures; // Avoid to load a texture more than once.
+
 		// Some stats.
 		int _nbTriangles = 0;
 		int _nbVertices	 = 0;
