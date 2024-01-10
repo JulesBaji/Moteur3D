@@ -22,6 +22,7 @@ namespace M3D_ISICG
 		unsigned int _id;
 		std::string	 _type;
 		std::string	 _path;
+		std::vector<GLuint> _gBufferTextures;
 	};
 
 	struct Material
