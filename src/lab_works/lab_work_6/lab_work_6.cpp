@@ -12,8 +12,9 @@ namespace M3D_ISICG
 	LabWork6::~LabWork6()
 	{
 		glDeleteProgram( program );
+		glDeleteProgram( _geometryPassProgram );
 
-		bunny.cleanGL();
+		Sponza.cleanGL();
 	}
 
 	bool LabWork6::init()
@@ -70,7 +71,7 @@ namespace M3D_ISICG
 		glDeleteShader( fragmentShader );
 		glDeleteShader( vertexShader );
 
-		bunny.load( "Bunny", "data/models/sponza/sponza.obj" );
+		Sponza.load( "Sponza", "data/models/sponza/sponza.obj" );
 
 		glUseProgram( program );
 
@@ -113,7 +114,7 @@ namespace M3D_ISICG
 		glProgramUniformMatrix4fv( program, MV, 1, 0, glm::value_ptr( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
 		glProgramUniform3fv( program, lightPos, 1, glm::value_ptr(VEC3F_ZERO) );
-		bunny.render( program );
+		Sponza.render( program );
 	}
 
 	void LabWork6::handleEvents( const SDL_Event & p_event )
@@ -169,7 +170,15 @@ namespace M3D_ISICG
 			glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 		if ( ImGui::SliderFloat( "fovy", &fovy, 60.0f, 120.0f ) )
 			_camera.setFovy( fovy );
-		ImGui::End();
+		/*ImGui::BeginListBox( "test", ImVec2( 100, 100 ) );
+
+		 for ( int i = 0; i < 6; i++ )
+		 {
+
+		 }
+
+		ImGui::EndListBox();*/
+		ImGui::End();		
 	}
 
 	void LabWork6::_updateViewMatrix()
@@ -187,5 +196,131 @@ namespace M3D_ISICG
 		_camera.setPosition( Vec3f( 0.0f, 0.0f, 0.2f ) );
 		_camera.setScreenSize( BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() );
 		_camera.setFovy( fovy );
+	}
+
+	bool LabWork6::initGeometryPass() 
+	{
+		std::cout << "Initializing lab work 6..." << std::endl;
+
+		// Set the color used by glClear to clear the color buffer (in render()).
+		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
+
+		const std::string fragmentShaderStr = readFile( _shaderFolder + "geometry_pass.frag" );
+		const std::string vertexShaderStr	= readFile( _shaderFolder + "geometry_pass.vert" );
+
+		const GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
+		const GLuint vertexShader	= glCreateShader( GL_VERTEX_SHADER );
+
+		const GLchar * vSrcFrag = fragmentShaderStr.c_str();
+		const GLchar * vSrcVert = vertexShaderStr.c_str();
+
+		glShaderSource( fragmentShader, 1, &vSrcFrag, NULL );
+		glShaderSource( vertexShader, 1, &vSrcVert, NULL );
+
+		glCompileShader( fragmentShader );
+		glCompileShader( vertexShader );
+
+		// Check if compilation is ok.
+		GLint compiled;
+		glGetShaderiv( vertexShader, GL_COMPILE_STATUS, &compiled );
+		if ( !compiled )
+		{
+			GLchar log[ 1024 ];
+			glGetShaderInfoLog( vertexShader, sizeof( log ), NULL, log );
+			glDeleteShader( vertexShader );
+			glDeleteShader( fragmentShader );
+			std ::cerr << " Error compiling vertex shader : " << log << std ::endl;
+			return false;
+		}
+
+		// Initialisation
+		_geometryPassProgram = glCreateProgram();
+		glAttachShader( _geometryPassProgram, fragmentShader );
+		glAttachShader( _geometryPassProgram, vertexShader );
+		glLinkProgram( _geometryPassProgram );
+
+		// Check if link is ok.
+		GLint linkedGPP;
+		glGetProgramiv( _geometryPassProgram, GL_LINK_STATUS, &linkedGPP );
+		if ( !linkedGPP )
+		{
+			GLchar log[ 1024 ];
+			glGetProgramInfoLog( _geometryPassProgram, sizeof( log ), NULL, log );
+			std ::cerr << " Error linking _geometryPassProgram : " << log << std ::endl;
+			return false;
+		}
+
+		glDeleteShader( fragmentShader );
+		glDeleteShader( vertexShader );
+
+		Sponza.load( "Sponza", "data/models/sponza/sponza.obj" );
+
+		glUseProgram( _geometryPassProgram );
+
+		std::cout << "Done!" << std::endl;
+		return true;
+	}
+
+	bool LabWork6::initShadingPass()
+	{
+		std::cout << "Initializing lab work 6..." << std::endl;
+
+		// Set the color used by glClear to clear the color buffer (in render()).
+		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
+
+		const std::string fragmentShaderStr = readFile( _shaderFolder + "geometry_pass.frag" );
+		const std::string vertexShaderStr	= readFile( _shaderFolder + "geometry_pass.vert" );
+
+		const GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
+		const GLuint vertexShader	= glCreateShader( GL_VERTEX_SHADER );
+
+		const GLchar * vSrcFrag = fragmentShaderStr.c_str();
+		const GLchar * vSrcVert = vertexShaderStr.c_str();
+
+		glShaderSource( fragmentShader, 1, &vSrcFrag, NULL );
+		glShaderSource( vertexShader, 1, &vSrcVert, NULL );
+
+		glCompileShader( fragmentShader );
+		glCompileShader( vertexShader );
+
+		// Check if compilation is ok.
+		GLint compiled;
+		glGetShaderiv( vertexShader, GL_COMPILE_STATUS, &compiled );
+		if ( !compiled )
+		{
+			GLchar log[ 1024 ];
+			glGetShaderInfoLog( vertexShader, sizeof( log ), NULL, log );
+			glDeleteShader( vertexShader );
+			glDeleteShader( fragmentShader );
+			std ::cerr << " Error compiling vertex shader : " << log << std ::endl;
+			return false;
+		}
+
+		// Initialisation
+		_shadingPassProgram = glCreateProgram();
+		glAttachShader( _shadingPassProgram, fragmentShader );
+		glAttachShader( _shadingPassProgram, vertexShader );
+		glLinkProgram( _shadingPassProgram );
+
+		// Check if link is ok.
+		GLint linkedGPP;
+		glGetProgramiv( _shadingPassProgram, GL_LINK_STATUS, &linkedGPP );
+		if ( !linkedGPP )
+		{
+			GLchar log[ 1024 ];
+			glGetProgramInfoLog( _shadingPassProgram, sizeof( log ), NULL, log );
+			std ::cerr << " Error linking _shadingPassProgram : " << log << std ::endl;
+			return false;
+		}
+
+		glDeleteShader( fragmentShader );
+		glDeleteShader( vertexShader );
+
+		Sponza.load( "Sponza", "data/models/sponza/sponza.obj" );
+
+		glUseProgram( _shadingPassProgram );
+
+		std::cout << "Done!" << std::endl;
+		return true;
 	}
 } // namespace M3D_ISICG

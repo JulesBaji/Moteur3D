@@ -22,7 +22,6 @@ namespace M3D_ISICG
 		unsigned int _id;
 		std::string	 _type;
 		std::string	 _path;
-		std::vector<GLuint> _gBufferTextures;
 	};
 
 	struct Material
@@ -45,6 +44,23 @@ namespace M3D_ISICG
 		Texture _specularMap;
 		Texture _shininessMap;
 		Texture _normalMap;
+
+		// TP6
+		bool	_hasPosFragMap;
+		bool	_hasDepthMap;
+
+		Texture _posFragsMap;
+		Texture _depthMap;
+
+		Texture _gBufferTextures[ 6 ] = 
+		{ 
+			_posFragsMap,
+			_normalMap,
+			_ambientMap, 
+			_diffuseMap,
+			_specularMap,
+			_depthMap
+		};
 	};
 
 	class TriangleMesh
@@ -61,6 +77,8 @@ namespace M3D_ISICG
 		void render( const GLuint p_glProgram ) const;
 
 		void cleanGL();
+
+		void _geometryPass( const GLuint p_glProgram, GLuint fboId ) const;
 
 	  private:
 		void _setupGL();

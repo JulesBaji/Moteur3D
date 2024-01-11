@@ -24,7 +24,7 @@ namespace M3D_ISICG
 
 		void cleanGL() override;
 
-		void initGBuffer( Image image );
+		void initGBuffer( GLuint & fboId, Material material );
 
 	  private:
 		void	 _loadMesh( const aiMesh * const p_mesh, const aiScene * const p_scene );
@@ -34,7 +34,6 @@ namespace M3D_ISICG
 	  public:
 		std::vector<TriangleMesh> _meshes;		   // A model can contain several meshes.
 		std::vector<Texture>	  _loadedTextures; // Avoid to load a texture more than once.
-		std::vector<Texture>	  _gBufferTextures;
 
 		// Some stats.
 		int _nbTriangles = 0;

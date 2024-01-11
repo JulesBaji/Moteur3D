@@ -324,8 +324,6 @@ namespace M3D_ISICG
 			// Niveau de mipmap
 			GLint mipmapLevels = std::floor( std::log2( std::max( image._width, image._height ) ) );
 
-
-
 			// Setup the texture format.
 			glTextureStorage2D( texture._id, mipmapLevels, internalFormat, image._width, image._height );
 			glTextureParameteri( texture._id, GL_TEXTURE_WRAP_S, GL_REPEAT );
@@ -349,51 +347,60 @@ namespace M3D_ISICG
 	}
 
 	// TP6 : frameBuffer
-	void TriangleMeshModel::initGBuffer(Image image)
+	void TriangleMeshModel::initGBuffer( GLuint &fboId, Material material )
 	{
-		GLuint fboId;
 		glCreateFramebuffers( 1, &fboId );
 
-		Texture texture;
-		// Niveau de mipmap
-		GLint mipmapLevels = std::floor( std::log2( std::max( image._width, image._height ) ) );
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
-								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };
+								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };		
+
+		Image image;
 
 		for (int i = 0; i < 6; i++) 
 		{
+
 			// Create a texture on the GPU.
-			glCreateTextures( GL_TEXTURE_2D, 1, &texture._gBufferTextures[ i ] );
+			glCreateTextures( GL_TEXTURE_2D, 6, &material._gBufferTextures[ i ]._id );
+
+			// Load the image and send it to the GPU.
+			const std::string fullPath = _dirPath + material._gBufferTextures[ i ]._path;
+			image.load( fullPath );
+
+			// Niveau de mipmap
+			GLint mipmapLevels = std::floor( std::log2( std::max( image._width, image._height ) ) );
 
 			// Setup the texture format.
 			if (i == 5) // Profondeur
 			{
-				glTextureStorage2D(
-					texture._gBufferTextures[ i ], mipmapLevels, GL_DEPTH_COMPONENT32F, image._width, image._height );
+				glTextureStorage2D( material._gBufferTextures[ i ]._id, mipmapLevels, GL_DEPTH_COMPONENT32F, image._width, image._height );
 			}
 			else
 			{
-				glTextureStorage2D(
-					texture._gBufferTextures[ i ], mipmapLevels, GL_RGBA32F, image._width, image._height );
+				glTextureStorage2D( material._gBufferTextures[ i ]._id, mipmapLevels, GL_RGBA32F, image._width, image._height );
 			}
 			
-			// PAS SUR
-			glTextureParameteri( texture._gBufferTextures[ i ], GL_TEXTURE_WRAP_S, GL_REPEAT );
-			glTextureParameteri( texture._gBufferTextures[ i ], GL_TEXTURE_WRAP_T, GL_REPEAT );
-			glTextureParameteri( texture._gBufferTextures[ i ], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-			glTextureParameteri( texture._gBufferTextures[ i ], GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+			glTextureParameteri( material._gBufferTextures[ i ]._id, GL_TEXTURE_WRAP_S, GL_REPEAT );
+			glTextureParameteri( material._gBufferTextures[ i ]._id, GL_TEXTURE_WRAP_T, GL_REPEAT );
+			glTextureParameteri( material._gBufferTextures[ i ]._id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+			glTextureParameteri( material._gBufferTextures[ i ]._id, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-			// PAS SUR
 			// Fill the texture.
-			glTextureSubImage2D(
-				texture._gBufferTextures[ i ], 0, 0, 0, image._width, image._height, GL_RGBA, GL_UNSIGNED_BYTE, image._pixels );
-			glGenerateTextureMipmap( texture._gBufferTextures[ i ] );
+			glTextureSubImage2D( material._gBufferTextures[ i ]._id, 0, 0, 0, image._width, image._height, GL_RGBA, GL_UNSIGNED_BYTE, image._pixels );
+			glGenerateTextureMipmap( material._gBufferTextures[ i ]._id );
 
 			// Liaison texture FBO
-			glNamedFramebufferTexture( fboId, drawBuffers[ i ], texture._gBufferTextures[ i ], mipmapLevels );
+			glNamedFramebufferTexture( fboId, drawBuffers[ i ], material._gBufferTextures[ i ]._id, 1 );
 		}
 
 		glNamedFramebufferDrawBuffers( fboId, 6, drawBuffers );
 		glCheckNamedFramebufferStatus;
+
+		// Copie d'1 texture
+		// Load the image and send it to the GPU.
+		const std::string fullPath = _dirPath + material._gBufferTextures[ 0 ]._path;
+		image.load( fullPath );
+
+		glNamedFramebufferReadBuffer( fboId, drawBuffers[ 0 ] );
+		glBlitNamedFramebuffer( fboId, 0, 0, 0, image._width, image._height, 0, 0, image._width, image._height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	}
 } // namespace M3D_ISICG
