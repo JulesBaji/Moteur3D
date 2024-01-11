@@ -324,6 +324,8 @@ namespace M3D_ISICG
 			// Niveau de mipmap
 			GLint mipmapLevels = std::floor( std::log2( std::max( image._width, image._height ) ) );
 
+
+
 			// Setup the texture format.
 			glTextureStorage2D( texture._id, mipmapLevels, internalFormat, image._width, image._height );
 			glTextureParameteri( texture._id, GL_TEXTURE_WRAP_S, GL_REPEAT );
@@ -347,20 +349,49 @@ namespace M3D_ISICG
 	}
 
 	// TP6 : frameBuffer
-	void TriangleMeshModel::initGBuffer(Image image, Texture texture, GLint mipmapLevels)
+	void TriangleMeshModel::initGBuffer(Image image)
 	{
 		GLuint fboId;
 		glCreateFramebuffers( 1, &fboId );
 
+		Texture texture;
+		// Niveau de mipmap
+		GLint mipmapLevels = std::floor( std::log2( std::max( image._width, image._height ) ) );
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
 								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };
 
-		glNamedFramebufferTexture( fboId, drawBuffers[ 0 ], texture._gBufferTextures[ 0 ], mipmapLevels );
-		glNamedFramebufferTexture( fboId, drawBuffers[ 1 ], texture._gBufferTextures[ 1 ], mipmapLevels );
-		glNamedFramebufferTexture( fboId, drawBuffers[ 2 ], texture._gBufferTextures[ 2 ], mipmapLevels );
-		glNamedFramebufferTexture( fboId, drawBuffers[ 3 ], texture._gBufferTextures[ 3 ], mipmapLevels );
-		glNamedFramebufferTexture( fboId, drawBuffers[ 4 ], texture._gBufferTextures[ 4 ], mipmapLevels );
-		glNamedFramebufferTexture( fboId, drawBuffers[ 5 ], texture._gBufferTextures[ 5 ], mipmapLevels );
+		for (int i = 0; i < 6; i++) 
+		{
+			// Create a texture on the GPU.
+			glCreateTextures( GL_TEXTURE_2D, 1, &texture._gBufferTextures[ i ] );
+
+			// Setup the texture format.
+			if (i == 5) // Profondeur
+			{
+				glTextureStorage2D(
+					texture._gBufferTextures[ i ], mipmapLevels, GL_DEPTH_COMPONENT32F, image._width, image._height );
+			}
+			else
+			{
+				glTextureStorage2D(
+					texture._gBufferTextures[ i ], mipmapLevels, GL_RGBA32F, image._width, image._height );
+			}
+			
+			// PAS SUR
+			glTextureParameteri( texture._gBufferTextures[ i ], GL_TEXTURE_WRAP_S, GL_REPEAT );
+			glTextureParameteri( texture._gBufferTextures[ i ], GL_TEXTURE_WRAP_T, GL_REPEAT );
+			glTextureParameteri( texture._gBufferTextures[ i ], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+			glTextureParameteri( texture._gBufferTextures[ i ], GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+			// PAS SUR
+			// Fill the texture.
+			glTextureSubImage2D(
+				texture._gBufferTextures[ i ], 0, 0, 0, image._width, image._height, GL_RGBA, GL_UNSIGNED_BYTE, image._pixels );
+			glGenerateTextureMipmap( texture._gBufferTextures[ i ] );
+
+			// Liaison texture FBO
+			glNamedFramebufferTexture( fboId, drawBuffers[ i ], texture._gBufferTextures[ i ], mipmapLevels );
+		}
 
 		glNamedFramebufferDrawBuffers( fboId, 6, drawBuffers );
 		glCheckNamedFramebufferStatus;
