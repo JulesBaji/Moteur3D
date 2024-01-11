@@ -27,12 +27,17 @@ namespace M3D_ISICG
 		void _updateProjMatrix();
 		void _initCamera();
 
+		bool initGeometryPass();
+		bool initShadingPass();
+
 	  private:
 		// ================ Scene data.
 		// ================
 
 		// ================ GL data.
 		GLuint			   program = GL_INVALID_INDEX;
+		GLuint			   _geometryPassProgram	  = GL_INVALID_INDEX;
+		GLuint			   _shadingPassProgram	  = GL_INVALID_INDEX;
 		GLint			   locLum  = GL_INVALID_INDEX;	
 		GLint			   MVP = GL_INVALID_INDEX;
 		GLint			   MV					  = GL_INVALID_INDEX;
@@ -53,7 +58,7 @@ namespace M3D_ISICG
 		Mat4f MVPMatrix			 = MAT4F_ID;
 		Mat4f			  mMatrix			 = MAT4F_ID;
 		Mat4f			  MVMatrix			 = MAT4F_ID;
-		TriangleMeshModel bunny;
+		TriangleMeshModel Sponza;
 		Vec3f			  posLumiere = Vec3f( 1.5f / 0.003f, 1.5f / 0.003f, -0.3f / 0.003f );
 		// ================
 		static const std::string _shaderFolder;
