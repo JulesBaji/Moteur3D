@@ -79,6 +79,7 @@ namespace M3D_ISICG
 		void cleanGL();
 
 		void _geometryPass( const GLuint p_glProgram, GLuint fboId ) const;
+		void _shadingPass( const GLuint p_glProgram, GLuint fboId ) const;
 
 	  private:
 		void _setupGL();

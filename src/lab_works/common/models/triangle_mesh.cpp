@@ -173,4 +173,49 @@ namespace M3D_ISICG
 		glBindTextureUnit( 3, 0 );
 		glBindTextureUnit( 4, 0 );
 	}
+
+	void TriangleMesh::_shadingPass( const GLuint p_glProgram, GLuint fboId ) const
+	{
+		glBindVertexArray( _vao );
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		//glEnable( GL_DEPTH_TEST );
+		// On indique que le FS écrira dans le FB par défaut
+
+		// Passage des uniforms
+		//  lumière ambiante
+		glProgramUniform3fv( p_glProgram, glGetUniformLocation( p_glProgram, "ambient" ), 1, glm::value_ptr( _material._ambient ) );
+		// lumière diffuse
+		glProgramUniform3fv( p_glProgram, glGetUniformLocation( p_glProgram, "diffuse" ), 1, glm::value_ptr( _material._diffuse ) );
+		// lumière qui brille
+		glProgramUniform1fv( p_glProgram, glGetUniformLocation( p_glProgram, "shininess" ), 1, &_material._shininess );
+		// Lumière spéculaire
+		glProgramUniform3fv( p_glProgram, glGetUniformLocation( p_glProgram, "specular" ), 1, value_ptr( _material._specular ) );
+
+		// texture posFrag
+		glProgramUniform1i( p_glProgram, glGetUniformLocation( p_glProgram, "uHasPosFragMap" ), _material._hasPosFragMap );
+		if ( _material._hasPosFragMap ) glBindTextureUnit( 0, _material._posFragsMap._id );
+		// texture normales
+		glProgramUniform1i( p_glProgram, glGetUniformLocation( p_glProgram, "uHasNormalMap" ), _material._hasNormalMap );
+		if ( _material._hasNormalMap ) glBindTextureUnit( 1, _material._normalMap._id );
+		// texture ambiante
+		glProgramUniform1i( p_glProgram, glGetUniformLocation( p_glProgram, "uHasAmbiantMap" ), _material._hasAmbientMap );
+		if ( _material._hasAmbientMap ) glBindTextureUnit( 2, _material._ambientMap._id );
+		// texture diffuse
+		glProgramUniform1i( p_glProgram, glGetUniformLocation( p_glProgram, "uHasDiffuseMap" ), _material._hasDiffuseMap );
+		if ( _material._hasDiffuseMap ) glBindTextureUnit( 3, _material._diffuseMap._id );		
+		// texture spéculaire
+		glProgramUniform1i( p_glProgram, glGetUniformLocation( p_glProgram, "uHasSpecularMap" ), _material._hasSpecularMap );
+		if ( _material._hasSpecularMap ) glBindTextureUnit( 4, _material._specularMap._id );
+		// texture depth
+		glProgramUniform1i( p_glProgram, glGetUniformLocation( p_glProgram, "uHasDepthMap" ), _material._hasDepthMap );
+		if ( _material._hasDepthMap ) glBindTextureUnit( 5, _material._depthMap._id );
+
+		glDrawElements( GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0 );
+		glBindVertexArray( 0 );
+		glBindTextureUnit( 0, 0 );
+		glBindTextureUnit( 1, 0 );
+		glBindTextureUnit( 2, 0 );
+		glBindTextureUnit( 3, 0 );
+		glBindTextureUnit( 4, 0 );
+	}
 } // namespace M3D_ISICG
