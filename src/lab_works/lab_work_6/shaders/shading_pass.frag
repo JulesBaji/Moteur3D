@@ -14,91 +14,34 @@ ivec2 coord = ivec2(gl_FragCoord.xy);
 
 // Données des textures
 vec4 dataPos = texelFetch( uPosFragsMap, coord, 0 );
-vec4 dataNormal = texelFetch( uPosFragsMap, coord, 0 );
-vec4 dataAmbient = texelFetch( uPosFragsMap, coord, 0 );
-vec4 dataDiffuse = texelFetch( uPosFragsMap, coord, 0 );
-vec4 dataSpecular = texelFetch( uPosFragsMap, coord, 0 );
-vec4 dataDepth = texelFetch( uPosFragsMap, coord, 0 );
-
-in vec3 normal, lightPos, fragPos;
-in vec2 texCoords;
+vec4 dataNormal = texelFetch( uNormalMap, coord, 0 );
+vec4 dataAmbient = texelFetch( uAmbientMap, coord, 0 );
+vec4 dataDiffuse = texelFetch( uDiffuseMap, coord, 0 );
+vec4 dataSpecular = texelFetch( uSpecularMap, coord, 0 );
+vec4 dataDepth = texelFetch( uDepthMap, coord, 0 );
 
 uniform vec3 ambient, specular, diffuse;
 uniform float shininess;
 uniform bool uHasPosFragMap, uHasNormalMap, uHasAmbientMap, uHasDiffuseMap, uHasSpecularMap, uHasDepthMap;
 
-in VS_OUT {
-	vec3 Ptangent;
-	vec3 Ltangent;
-} fs_in;
-
 void main()
 {
-	vec3 posFragTexture, ambientTexture, diffuseTexture, specularTexture, depthMapTexture;
-	float shininessTexture, alphaDiffuseTexture;
+	vec3 posFragsTexture, normalTexture, ambientTexture, diffuseTexture, specularTexture, depthTexture;
 
-	if (uHasPosFragMap) 
-	{
-		posFragTexture = vec3(texture(dataPos, coord));
-	}
+	if ( uHasPosFragMap ) posFragsTexture = dataPos;
+	
+	if ( uHasNormalMap ) normalTexture = dataNormal;
+	
+	if ( uHasAmbientMap ) ambientTexture = dataAmbient;
+	else ambientTexture = ambient;
 
-	if (uHasDepthMap) 
-	{
-		depthMapTexture = vec3(texture(uDepthMap, coord));
-	}
+	if ( uHasDiffuseMap ) diffuseTexture = dataDiffuse;
+	else ambientTexture = diffuse;
 
-	if (uHasDiffuseMap) 
-	{
-		diffuseTexture = vec3(texture(uDiffuseMap, coord));
-		alphaDiffuseTexture = texture(uDiffuseMap, coord).w;
-		if (alphaDiffuseTexture <= 0.5) discard;
-	}
-	else
-	{
-		diffuseTexture = diffuse;
-	}
+	if ( uHasSpecularMap ) specularTexture = dataSpecular;
+	else ambientTexture = specular;
 
-	if (uHasAmbientMap) 
-	{
-		ambientTexture = vec3(texture(uAmbientMap, coord));
-	}
-	else
-	{
-		ambientTexture = ambient;
-	}
+	if ( uHasDepthMap ) depthTexture = dataDepth;
 
-	if (uHasSpecularMap) 
-	{
-		specularTexture = texture(uSpecularMap, coord).xxx;
-		shininessTexture = texture(uSpecularMap, coord).w;
-	}
-	else
-	{
-		specularTexture = specular;
-		shininessTexture = shininess;
-	}
-
-	vec3 lightDir, viewDir, N;
-	if ( uHasNormalMap )
-	{
-		lightDir = normalize( - fs_in.Ptangent );
-		viewDir	 = normalize( -fs_in.Ptangent );
-		N		 = texture( uNormalMap, coord ).xyz;
-		N		 = normalize( N * 2.0 - 1.0 );
-	}
-	else
-	{
-		lightDir = normalize( lightPos - fragPos );
-		viewDir	 = normalize( -fragPos );
-		N		 = normalize( normal );
-	}
-
-	if ( dot( N, lightDir ) < 0 )
-		N = -N;
-
-	vec3 reflectDir = reflect( -lightDir, N );
-	vec3 diffuseColor = diffuseTexture * max( dot( N, lightDir ), 0.f );
-	vec3 specularColor = specularTexture * pow(max(dot(viewDir, reflectDir), 0.f), shininessTexture);
-
-	fragColor = vec4( ambientTexture + diffuseColor + specularColor, 1.0 );
+	fragColor = ambientTexture + diffuseTexture + specularTexture;
 }

@@ -29,6 +29,7 @@ namespace M3D_ISICG
 
 		bool initGeometryPass();
 		bool initShadingPass();
+		void createFullscreenQuad();
 
 	  private:
 		// ================ Scene data.

@@ -240,13 +240,13 @@ namespace M3D_ISICG
 		glLinkProgram( _geometryPassProgram );
 
 		// Check if link is ok.
-		GLint linkedGPP;
-		glGetProgramiv( _geometryPassProgram, GL_LINK_STATUS, &linkedGPP );
-		if ( !linkedGPP )
+		GLint linked;
+		glGetProgramiv( program, GL_LINK_STATUS, &linked );
+		if ( !linked )
 		{
 			GLchar log[ 1024 ];
-			glGetProgramInfoLog( _geometryPassProgram, sizeof( log ), NULL, log );
-			std ::cerr << " Error linking _geometryPassProgram : " << log << std ::endl;
+			glGetProgramInfoLog( program, sizeof( log ), NULL, log );
+			std ::cerr << " Error linking program : " << log << std ::endl;
 			return false;
 		}
 
@@ -303,22 +303,61 @@ namespace M3D_ISICG
 		glLinkProgram( _shadingPassProgram );
 
 		// Check if link is ok.
-		GLint linkedGPP;
-		glGetProgramiv( _shadingPassProgram, GL_LINK_STATUS, &linkedGPP );
-		if ( !linkedGPP )
+		GLint linked;
+		glGetProgramiv( program, GL_LINK_STATUS, &linked );
+		if ( !linked )
 		{
 			GLchar log[ 1024 ];
-			glGetProgramInfoLog( _shadingPassProgram, sizeof( log ), NULL, log );
-			std ::cerr << " Error linking _shadingPassProgram : " << log << std ::endl;
+			glGetProgramInfoLog( program, sizeof( log ), NULL, log );
+			std ::cerr << " Error linking program : " << log << std ::endl;
 			return false;
 		}
 
 		glDeleteShader( fragmentShader );
 		glDeleteShader( vertexShader );
 
-		Sponza.load( "Sponza", "data/models/sponza/sponza.obj" );
+		//Sponza.load( "Sponza", "data/models/sponza/sponza.obj" );
 
 		glUseProgram( _shadingPassProgram );
+
+		// Créer un VBO pour les coordonnées du quad
+		const GLfloat quadVertices[] = {
+			-1.0f, 1.0f,  0.0f, // En haut à gauche
+			-1.0f, -1.0f, 0.0f, // En bas à gauche
+			1.0f,  -1.0f, 0.0f, // En bas à droite
+			1.0f,  1.0f,  0.0f	// En haut à droite
+		};
+
+		GLuint vboQuad;
+		glGenBuffers( 1, &vboQuad );
+		glBindBuffer( GL_ARRAY_BUFFER, vboQuad );
+		glBufferData( GL_ARRAY_BUFFER, sizeof( quadVertices ), quadVertices, GL_STATIC_DRAW );
+
+		// Créer un IBO pour les indices du quad
+		const GLuint quadIndices[] = {
+			0, 1, 2, // Premier triangle
+			0, 2, 3	 // Deuxième triangle
+		};
+
+		GLuint eboQuad;
+		glGenBuffers( 1, &eboQuad );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, eboQuad );
+		glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( quadIndices ), quadIndices, GL_STATIC_DRAW );
+
+		// Créer un VAO pour le quad
+		GLuint vaoQuad;
+		glGenVertexArrays( 1, &vaoQuad );
+		glBindVertexArray( vaoQuad );
+
+		// Spécifier le format de l'attribut pour les coordonnées
+		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( GLfloat ), (GLvoid *)0 );
+		glEnableVertexAttribArray( 0 );
+
+		// Liaison de l'EBO au VAO
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, eboQuad );
+
+		// Revenir à l'état par défaut
+		glBindVertexArray( 0 );
 
 		std::cout << "Done!" << std::endl;
 		return true;
