@@ -115,6 +115,9 @@
     <ClCompile Include="src\lab_works\lab_work_6\lab_work_6.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\lab_works\projet\projet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\application.hpp">
@@ -181,6 +184,7 @@
     <ClInclude Include="src\lab_works\lab_work_4\lab_work_4.hpp" />
     <ClInclude Include="src\lab_works\lab_work_5\lab_work_5.hpp" />
     <ClInclude Include="src\lab_works\lab_work_6\lab_work_6.hpp" />
+    <ClInclude Include="src\lab_works\projet\projet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="x64\Debug\M3D_ISICG.tlog\CL.command.1.tlog" />
