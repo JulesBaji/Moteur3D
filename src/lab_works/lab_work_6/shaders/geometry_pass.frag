@@ -90,7 +90,7 @@ void main()
 	vec3 diffuseColor = diffuseTexture * max( dot( N, lightDir ), 0.f );
 	vec3 specularColor = specularTexture * pow(max(dot(viewDir, reflectDir), 0.f), shininessTexture);
 
-	fragPosition = vec4( fragPos, 1.0f );
+	fragPosition = vec4( Ptangent, 1.0f );
 	fragNormal = vec4( N, 1.0f );
 	fragAmbient = vec4( ambientTexture, 1.0f );
 	fragDiffuse = vec4( diffuseColor, 1.0f );

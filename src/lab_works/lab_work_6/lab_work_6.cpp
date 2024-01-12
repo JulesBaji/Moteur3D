@@ -13,6 +13,7 @@ namespace M3D_ISICG
 	{
 		glDeleteProgram( program );
 		glDeleteProgram( _geometryPassProgram );
+		glDeleteProgram( _shadingPassProgram );
 
 		Sponza.cleanGL();
 	}
@@ -26,18 +27,23 @@ namespace M3D_ISICG
 
 		const std::string fragmentShaderStr = readFile( _shaderFolder + "geometry_pass.frag" );
 		const std::string vertexShaderStr	= readFile( _shaderFolder + "geometry_pass.vert" );
+		const std::string FragmenshadingPassStr = readFile( _shaderFolder + "shading_pass.frag" );
 
 		const GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
 		const GLuint vertexShader	= glCreateShader( GL_VERTEX_SHADER );
+		const GLuint shadingPassShader	= glCreateShader( GL_FRAGMENT_SHADER );
 
 		const GLchar * vSrcFrag = fragmentShaderStr.c_str();
 		const GLchar * vSrcVert = vertexShaderStr.c_str();
+		const GLchar * vSrcFragShadingPass = FragmenshadingPassStr.c_str();
 
 		glShaderSource( fragmentShader, 1, &vSrcFrag, NULL );
 		glShaderSource( vertexShader, 1, &vSrcVert, NULL );
+		glShaderSource( shadingPassShader, 1, &vSrcFragShadingPass, NULL );
 
 		glCompileShader( fragmentShader );
 		glCompileShader( vertexShader );
+		glCompileShader( shadingPassShader );
 
 		// Check if compilation is ok.
 		GLint compiled;
@@ -52,6 +58,7 @@ namespace M3D_ISICG
 			return false;
 		}
 
+		// program
 		program = glCreateProgram();
 		glAttachShader( program, fragmentShader );
 		glAttachShader( program, vertexShader );
@@ -64,9 +71,45 @@ namespace M3D_ISICG
 		{
 			GLchar log[ 1024 ];
 			glGetProgramInfoLog( program, sizeof( log ), NULL, log );
-			std ::cerr << " Error linking program : " << log << std ::endl;
+			std ::cerr << " Error linking " << program << " : " << log << std ::endl;
 			return false;
 		}
+		return true; 
+
+		// _geometryPassProgram
+		_geometryPassProgram = glCreateProgram();
+		glAttachShader( _geometryPassProgram, fragmentShader );
+		glAttachShader( _geometryPassProgram, vertexShader );
+		glLinkProgram( _geometryPassProgram );
+
+		// Check if link is ok.
+		GLint linkedGPP;
+		glGetProgramiv( _geometryPassProgram, GL_LINK_STATUS, &linkedGPP );
+		if ( !linkedGPP )
+		{
+			GLchar log[ 1024 ];
+			glGetProgramInfoLog( _geometryPassProgram, sizeof( log ), NULL, log );
+			std ::cerr << " Error linking " << _geometryPassProgram << " : " << log << std ::endl;
+			return false;
+		}
+		return true;
+
+		// _shadingPassProgram
+		_shadingPassProgram = glCreateProgram();
+		glAttachShader( _shadingPassProgram, shadingPassShader );
+		glLinkProgram( _shadingPassProgram );
+
+		// Check if link is ok.
+		GLint linkedSPP;
+		glGetProgramiv( _shadingPassProgram, GL_LINK_STATUS, &linkedSPP );
+		if ( !linkedSPP )
+		{
+			GLchar log[ 1024 ];
+			glGetProgramInfoLog( _shadingPassProgram, sizeof( log ), NULL, log );
+			std ::cerr << " Error linking " << _shadingPassProgram << " : " << log << std ::endl;
+			return false;
+		}
+		return true;
 
 		glDeleteShader( fragmentShader );
 		glDeleteShader( vertexShader );
@@ -113,8 +156,12 @@ namespace M3D_ISICG
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
 		glProgramUniformMatrix4fv( program, MV, 1, 0, glm::value_ptr( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
-		glProgramUniform3fv( program, lightPos, 1, glm::value_ptr(VEC3F_ZERO) );
+		glProgramUniform3fv( program, lightPos, 1, glm::value_ptr( VEC3F_ZERO ) );
+
+		_geometryPass();
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		Sponza.render( program );
+		_shadingPass();
 	}
 
 	void LabWork6::handleEvents( const SDL_Event & p_event )
@@ -198,168 +245,147 @@ namespace M3D_ISICG
 		_camera.setFovy( fovy );
 	}
 
-	bool LabWork6::initGeometryPass() 
+	// TP6 : frameBuffer
+	void LabWork6::initGBuffer()
 	{
-		std::cout << "Initializing lab work 6..." << std::endl;
+		glCreateFramebuffers( 1, &fboId );
 
-		// Set the color used by glClear to clear the color buffer (in render()).
-		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
+		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
+								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };		
 
-		const std::string fragmentShaderStr = readFile( _shaderFolder + "geometry_pass.frag" );
-		const std::string vertexShaderStr	= readFile( _shaderFolder + "geometry_pass.vert" );
-
-		const GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
-		const GLuint vertexShader	= glCreateShader( GL_VERTEX_SHADER );
-
-		const GLchar * vSrcFrag = fragmentShaderStr.c_str();
-		const GLchar * vSrcVert = vertexShaderStr.c_str();
-
-		glShaderSource( fragmentShader, 1, &vSrcFrag, NULL );
-		glShaderSource( vertexShader, 1, &vSrcVert, NULL );
-
-		glCompileShader( fragmentShader );
-		glCompileShader( vertexShader );
-
-		// Check if compilation is ok.
-		GLint compiled;
-		glGetShaderiv( vertexShader, GL_COMPILE_STATUS, &compiled );
-		if ( !compiled )
+		for (int i = 0; i < 6; i++) 
 		{
-			GLchar log[ 1024 ];
-			glGetShaderInfoLog( vertexShader, sizeof( log ), NULL, log );
-			glDeleteShader( vertexShader );
-			glDeleteShader( fragmentShader );
-			std ::cerr << " Error compiling vertex shader : " << log << std ::endl;
-			return false;
+
+			// Create a texture on the GPU.
+			glCreateTextures( GL_TEXTURE_2D, 6, &_gBufferTextures[ i ] );
+
+			// Niveau de mipmap
+			GLint mipmapLevels = std::floor( std::log2( std::max( BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() ) ) );
+
+			// Setup the texture format.
+			if (i == 5) // Profondeur
+			{
+				glTextureStorage2D( _gBufferTextures[ i ], mipmapLevels, GL_DEPTH_COMPONENT32F, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() );
+			}
+			else
+			{
+				glTextureStorage2D( _gBufferTextures[ i ], mipmapLevels, GL_RGBA32F, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() );
+			}
+			
+			glTextureParameteri( _gBufferTextures[ i ], GL_TEXTURE_WRAP_S, GL_REPEAT );
+			glTextureParameteri( _gBufferTextures[ i ], GL_TEXTURE_WRAP_T, GL_REPEAT );
+			glTextureParameteri( _gBufferTextures[ i ], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+			glTextureParameteri( _gBufferTextures[ i ], GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+			// Fill the texture.
+			glTextureSubImage2D( _gBufferTextures[ i ], 0, 0, 0, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight(), GL_RGBA, GL_UNSIGNED_BYTE, nullptr );
+			glGenerateTextureMipmap( _gBufferTextures[ i ] );
+
+			// Liaison texture FBO
+			glNamedFramebufferTexture( fboId, drawBuffers[ i ], _gBufferTextures[ i ], mipmapLevels );
 		}
 
-		// Initialisation
-		_geometryPassProgram = glCreateProgram();
-		glAttachShader( _geometryPassProgram, fragmentShader );
-		glAttachShader( _geometryPassProgram, vertexShader );
-		glLinkProgram( _geometryPassProgram );
+		glNamedFramebufferDrawBuffers( fboId, 6, drawBuffers );
+		glCheckNamedFramebufferStatus;
 
-		// Check if link is ok.
-		GLint linked;
-		glGetProgramiv( program, GL_LINK_STATUS, &linked );
-		if ( !linked )
-		{
-			GLchar log[ 1024 ];
-			glGetProgramInfoLog( program, sizeof( log ), NULL, log );
-			std ::cerr << " Error linking program : " << log << std ::endl;
-			return false;
-		}
-
-		glDeleteShader( fragmentShader );
-		glDeleteShader( vertexShader );
-
-		Sponza.load( "Sponza", "data/models/sponza/sponza.obj" );
-
-		glUseProgram( _geometryPassProgram );
-
-		std::cout << "Done!" << std::endl;
-		return true;
+		// Copie d'1 texture
+		glNamedFramebufferReadBuffer( fboId, drawBuffers[ 0 ] );
+		glBlitNamedFramebuffer( fboId, 0, 0, 0, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight(), 0, 0, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	}
 
-	bool LabWork6::initShadingPass()
+	void LabWork6::_geometryPass()
 	{
-		std::cout << "Initializing lab work 6..." << std::endl;
+		//  On indique que le FS écrira dans le FBO
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, fboId );
+		glBindVertexArray( vao );
+		glEnable( GL_DEPTH_TEST );
 
-		// Set the color used by glClear to clear the color buffer (in render()).
-		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
+		// texture posFrag
+		glBindTextureUnit( 0, _gBufferTextures[ 0 ] );
+		// texture normales
+		glBindTextureUnit( 1, _gBufferTextures[ 1 ] );
+		// texture ambiante
+		glBindTextureUnit( 2, _gBufferTextures[ 2 ] );
+		// texture diffuse
+		glBindTextureUnit( 3, _gBufferTextures[ 3 ] );
+		// texture spéculaire
+		glBindTextureUnit( 4, _gBufferTextures[ 4 ] );
+		// texture depth
+		glBindTextureUnit( 5, _gBufferTextures[ 5 ] );
 
-		const std::string fragmentShaderStr = readFile( _shaderFolder + "geometry_pass.frag" );
-		const std::string vertexShaderStr	= readFile( _shaderFolder + "geometry_pass.vert" );
-
-		const GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
-		const GLuint vertexShader	= glCreateShader( GL_VERTEX_SHADER );
-
-		const GLchar * vSrcFrag = fragmentShaderStr.c_str();
-		const GLchar * vSrcVert = vertexShaderStr.c_str();
-
-		glShaderSource( fragmentShader, 1, &vSrcFrag, NULL );
-		glShaderSource( vertexShader, 1, &vSrcVert, NULL );
-
-		glCompileShader( fragmentShader );
-		glCompileShader( vertexShader );
-
-		// Check if compilation is ok.
-		GLint compiled;
-		glGetShaderiv( vertexShader, GL_COMPILE_STATUS, &compiled );
-		if ( !compiled )
-		{
-			GLchar log[ 1024 ];
-			glGetShaderInfoLog( vertexShader, sizeof( log ), NULL, log );
-			glDeleteShader( vertexShader );
-			glDeleteShader( fragmentShader );
-			std ::cerr << " Error compiling vertex shader : " << log << std ::endl;
-			return false;
-		}
-
-		// Initialisation
-		_shadingPassProgram = glCreateProgram();
-		glAttachShader( _shadingPassProgram, fragmentShader );
-		glAttachShader( _shadingPassProgram, vertexShader );
-		glLinkProgram( _shadingPassProgram );
-
-		// Check if link is ok.
-		GLint linked;
-		glGetProgramiv( program, GL_LINK_STATUS, &linked );
-		if ( !linked )
-		{
-			GLchar log[ 1024 ];
-			glGetProgramInfoLog( program, sizeof( log ), NULL, log );
-			std ::cerr << " Error linking program : " << log << std ::endl;
-			return false;
-		}
-
-		glDeleteShader( fragmentShader );
-		glDeleteShader( vertexShader );
-
-		//Sponza.load( "Sponza", "data/models/sponza/sponza.obj" );
-
-		glUseProgram( _shadingPassProgram );
-
-		// Créer un VBO pour les coordonnées du quad
-		const GLfloat quadVertices[] = {
-			-1.0f, 1.0f,  0.0f, // En haut à gauche
-			-1.0f, -1.0f, 0.0f, // En bas à gauche
-			1.0f,  -1.0f, 0.0f, // En bas à droite
-			1.0f,  1.0f,  0.0f	// En haut à droite
-		};
-
-		GLuint vboQuad;
-		glGenBuffers( 1, &vboQuad );
-		glBindBuffer( GL_ARRAY_BUFFER, vboQuad );
-		glBufferData( GL_ARRAY_BUFFER, sizeof( quadVertices ), quadVertices, GL_STATIC_DRAW );
-
-		// Créer un IBO pour les indices du quad
-		const GLuint quadIndices[] = {
-			0, 1, 2, // Premier triangle
-			0, 2, 3	 // Deuxième triangle
-		};
-
-		GLuint eboQuad;
-		glGenBuffers( 1, &eboQuad );
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, eboQuad );
-		glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( quadIndices ), quadIndices, GL_STATIC_DRAW );
-
-		// Créer un VAO pour le quad
-		GLuint vaoQuad;
-		glGenVertexArrays( 1, &vaoQuad );
-		glBindVertexArray( vaoQuad );
-
-		// Spécifier le format de l'attribut pour les coordonnées
-		glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( GLfloat ), (GLvoid *)0 );
-		glEnableVertexAttribArray( 0 );
-
-		// Liaison de l'EBO au VAO
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, eboQuad );
-
-		// Revenir à l'état par défaut
 		glBindVertexArray( 0 );
+		glBindTextureUnit( 0, 0 );
+		glBindTextureUnit( 1, 0 );
+		glBindTextureUnit( 2, 0 );
+		glBindTextureUnit( 3, 0 );
+		glBindTextureUnit( 4, 0 );
+	}
 
-		std::cout << "Done!" << std::endl;
-		return true;
+	void LabWork6::_shadingPass()
+	{
+		//  On indique que le FS écrira dans le FB par défaut
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		glBindVertexArray( vao );
+		glDisable( GL_DEPTH_TEST );
+
+		// texture posFrag
+		glBindTextureUnit( 6, _gBufferTextures[ 0 ] );
+		// texture normales
+		glBindTextureUnit( 7, _gBufferTextures[ 1 ] );
+		// texture ambiante
+		glBindTextureUnit( 8, _gBufferTextures[ 2 ] );
+		// texture diffuse
+		glBindTextureUnit( 9, _gBufferTextures[ 3 ] );
+		// texture spéculaire
+		glBindTextureUnit( 10, _gBufferTextures[ 4 ] );
+		// texture depth
+		glBindTextureUnit( 11, _gBufferTextures[ 5 ] );
+
+		// Reprise du TP2
+		quad();
+
+		// Création sur GPU
+		glCreateVertexArrays( 1, &vao );
+		glCreateBuffers( 1, &vbo );
+		glCreateBuffers( 1, &ebo );
+
+		// Remplissage du buffer
+		glNamedBufferData( vbo, sommets.size() * sizeof( Vec2f ), sommets.data(), GL_STATIC_DRAW );
+		glNamedBufferData( ebo, indices.size() * sizeof( int ), indices.data(), GL_STATIC_DRAW );
+
+		// Activer les attributs du VAO
+		glEnableVertexArrayAttrib( vao, 0 );
+		glEnableVertexArrayAttrib( vao, 1 );
+
+		// Définir le format de l'attribut
+		glVertexArrayAttribFormat( vao, 0, 2, GL_FLOAT, GL_FALSE, 0 );
+		glVertexArrayAttribFormat( vao, 1, 3, GL_FLOAT, GL_FALSE, 0 );
+
+		// Spécifier le VBO à lire
+		glVertexArrayVertexBuffer( vao, 0, vbo, 0, sizeof( float ) * 2 );
+
+		// Connecter le VAO avec le Vertex Shader
+		glVertexArrayAttribBinding( vao, 0, 0 );
+		glVertexArrayAttribBinding( vao, 1, 1 );
+
+		// Liaison EBO VAO
+		glVertexArrayElementBuffer( vao, ebo );
+
+		glDrawElements( GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0 );
+		glBindVertexArray( 0 );
+		glBindTextureUnit( 0, 0 );
+		glBindTextureUnit( 1, 0 );
+		glBindTextureUnit( 2, 0 );
+		glBindTextureUnit( 3, 0 );
+		glBindTextureUnit( 4, 0 );
+	}
+
+	void LabWork6::quad()
+	{
+		// Les sommets du quad
+		sommets = { { -1.f, 1.f }, { 1.f, 1.f }, { 1.f, -1.f }, { -1.f, -1.f } };
+
+		// Les indices des sommets pour former les triangles
+		indices = { 0, 1, 2, 2, 3, 0 };
 	}
 } // namespace M3D_ISICG

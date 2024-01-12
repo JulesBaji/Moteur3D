@@ -24,8 +24,6 @@ namespace M3D_ISICG
 
 		void cleanGL() override;
 
-		void initGBuffer( GLuint & fboId, Material material );
-
 	  private:
 		void	 _loadMesh( const aiMesh * const p_mesh, const aiScene * const p_scene );
 		Material _loadMaterial( const aiMaterial * const p_mtl );
