@@ -27,12 +27,16 @@ namespace M3D_ISICG
 		void _updateProjMatrix();
 		void _initCamera();
 
-		bool initGeometryPass();
-		bool initShadingPass();
-		void createFullscreenQuad();
+		// TP6
+		void initGBuffer();
+		void _geometryPass();
+		void _shadingPass();
+		void quad();
 
 	  private:
 		// ================ Scene data.
+		std::vector<Vec2f> sommets;
+		std::vector<int>   indices;
 		// ================
 
 		// ================ GL data.
@@ -46,6 +50,11 @@ namespace M3D_ISICG
 		GLint			   viewMatrix			  = GL_INVALID_INDEX;
 		GLint			   projMatrix			  = GL_INVALID_INDEX;
 		GLint			   lightPos				  = GL_INVALID_INDEX;
+		//TP6
+		GLuint			   fboId = GL_INVALID_INDEX;
+		GLuint			   vbo	 = GL_INVALID_INDEX;
+		GLuint			   vao	 = GL_INVALID_INDEX;
+		GLuint			   ebo	 = GL_INVALID_INDEX;
 		// ================
 		
 		// ================ Settings.
@@ -53,6 +62,7 @@ namespace M3D_ISICG
 		float luminosite = 1.0f;
 		Camera _camera;
 		float  fovy = 60.f;
+		std::vector<GLuint> _gBufferTextures;
 		// Dans le .hpp
 		float _cameraSpeed		 = 0.1f;
 		float _cameraSensitivity = 0.1f;

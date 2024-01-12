@@ -46,8 +46,11 @@ namespace M3D_ISICG
 		Texture _normalMap;
 
 		// TP6
-		bool	_hasPosFragMap;
-		bool	_hasDepthMap;
+		Vec3f	_posFrags = VEC3F_ZERO;
+		Vec3f	_depth = VEC3F_ZERO;
+
+		bool _hasPosFragMap = false;
+		bool _hasDepthMap	= false;
 
 		Texture _posFragsMap;
 		Texture _depthMap;
@@ -77,9 +80,6 @@ namespace M3D_ISICG
 		void render( const GLuint p_glProgram ) const;
 
 		void cleanGL();
-
-		void _geometryPass( const GLuint p_glProgram, GLuint fboId ) const;
-		void _shadingPass( const GLuint p_glProgram, GLuint fboId ) const;
 
 	  private:
 		void _setupGL();

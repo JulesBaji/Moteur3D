@@ -43,5 +43,5 @@ void main()
 
 	if ( uHasDepthMap ) depthTexture = dataDepth;
 
-	fragColor = ambientTexture + diffuseTexture + specularTexture;
+	fragColor = posFragsTexture + normalTexture + ambientTexture + diffuseTexture + specularTexture + depthTexture;
 }
