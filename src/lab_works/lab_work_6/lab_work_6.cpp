@@ -157,11 +157,8 @@ namespace M3D_ISICG
 		glProgramUniformMatrix4fv( program, MV, 1, 0, glm::value_ptr( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
 		glProgramUniform3fv( program, lightPos, 1, glm::value_ptr( VEC3F_ZERO ) );
-
-		_geometryPass();
-		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-		Sponza.render( program );
-		_shadingPass();
+		_geometryPass();	
+		_shadingPass();		
 	}
 
 	void LabWork6::handleEvents( const SDL_Event & p_event )
@@ -257,19 +254,16 @@ namespace M3D_ISICG
 		{
 
 			// Create a texture on the GPU.
-			glCreateTextures( GL_TEXTURE_2D, 6, &_gBufferTextures[ i ] );
-
-			// Niveau de mipmap
-			GLint mipmapLevels = std::floor( std::log2( std::max( BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() ) ) );
+			glCreateTextures( GL_TEXTURE_2D, 1, &_gBufferTextures[ i ] );
 
 			// Setup the texture format.
 			if (i == 5) // Profondeur
 			{
-				glTextureStorage2D( _gBufferTextures[ i ], mipmapLevels, GL_DEPTH_COMPONENT32F, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() );
+				glTextureStorage2D( _gBufferTextures[ i ], 1, GL_DEPTH_COMPONENT32F, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() );
 			}
 			else
 			{
-				glTextureStorage2D( _gBufferTextures[ i ], mipmapLevels, GL_RGBA32F, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() );
+				glTextureStorage2D( _gBufferTextures[ i ], 1, GL_RGBA32F, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() );
 			}
 			
 			glTextureParameteri( _gBufferTextures[ i ], GL_TEXTURE_WRAP_S, GL_REPEAT );
@@ -282,50 +276,34 @@ namespace M3D_ISICG
 			glGenerateTextureMipmap( _gBufferTextures[ i ] );
 
 			// Liaison texture FBO
-			glNamedFramebufferTexture( fboId, drawBuffers[ i ], _gBufferTextures[ i ], mipmapLevels );
+			glNamedFramebufferTexture( fboId, drawBuffers[ i ], _gBufferTextures[ i ], 1 );
 		}
 
-		glNamedFramebufferDrawBuffers( fboId, 6, drawBuffers );
+		glNamedFramebufferDrawBuffers( fboId, 5, drawBuffers );
 		glCheckNamedFramebufferStatus;
-
-		// Copie d'1 texture
-		glNamedFramebufferReadBuffer( fboId, drawBuffers[ 0 ] );
-		glBlitNamedFramebuffer( fboId, 0, 0, 0, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight(), 0, 0, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	}
 
 	void LabWork6::_geometryPass()
 	{
+		glEnable( GL_DEPTH_TEST );
+		glUseProgram( _geometryPassProgram );
 		//  On indique que le FS écrira dans le FBO
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, fboId );
-		glBindVertexArray( vao );
-		glEnable( GL_DEPTH_TEST );
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		Sponza.render( _geometryPassProgram );
 
-		// texture posFrag
-		glBindTextureUnit( 0, _gBufferTextures[ 0 ] );
-		// texture normales
-		glBindTextureUnit( 1, _gBufferTextures[ 1 ] );
-		// texture ambiante
-		glBindTextureUnit( 2, _gBufferTextures[ 2 ] );
-		// texture diffuse
-		glBindTextureUnit( 3, _gBufferTextures[ 3 ] );
-		// texture spéculaire
-		glBindTextureUnit( 4, _gBufferTextures[ 4 ] );
-		// texture depth
-		glBindTextureUnit( 5, _gBufferTextures[ 5 ] );
-
-		glBindVertexArray( 0 );
-		glBindTextureUnit( 0, 0 );
-		glBindTextureUnit( 1, 0 );
-		glBindTextureUnit( 2, 0 );
-		glBindTextureUnit( 3, 0 );
-		glBindTextureUnit( 4, 0 );
+		// Copie d'1 texture
+		glNamedFramebufferReadBuffer( fboId, drawBuffers[ 0 ] );
+		glBlitNamedFramebuffer( fboId, 0, 0, 0, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight(), 0, 0, BaseLabWork::getWindowWidth(), 
+			BaseLabWork::getWindowHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	}
 
 	void LabWork6::_shadingPass()
 	{
+		glBindVertexArray( vao );
+		glUseProgram( _shadingPassProgram );
 		//  On indique que le FS écrira dans le FB par défaut
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-		glBindVertexArray( vao );
 		glDisable( GL_DEPTH_TEST );
 
 		// texture posFrag
