@@ -40,7 +40,6 @@ namespace M3D_ISICG
 		// ================
 
 		// ================ GL data.
-		GLuint			   program = GL_INVALID_INDEX;
 		GLuint			   _geometryPassProgram	  = GL_INVALID_INDEX;
 		GLuint			   _shadingPassProgram	  = GL_INVALID_INDEX;
 		GLint			   locLum  = GL_INVALID_INDEX;	
@@ -55,6 +54,7 @@ namespace M3D_ISICG
 		GLuint			   vbo	 = GL_INVALID_INDEX;
 		GLuint			   vao	 = GL_INVALID_INDEX;
 		GLuint			   ebo	 = GL_INVALID_INDEX;
+		GLenum			   textureChoisie = GL_INVALID_INDEX;
 		// ================
 		
 		// ================ Settings.
