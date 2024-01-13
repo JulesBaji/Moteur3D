@@ -58,24 +58,6 @@ namespace M3D_ISICG
 			return false;
 		}
 
-		// program
-		program = glCreateProgram();
-		glAttachShader( program, fragmentShader );
-		glAttachShader( program, vertexShader );
-		glLinkProgram( program );
-
-		// Check if link is ok.
-		GLint linked;
-		glGetProgramiv( program, GL_LINK_STATUS, &linked );
-		if ( !linked )
-		{
-			GLchar log[ 1024 ];
-			glGetProgramInfoLog( program, sizeof( log ), NULL, log );
-			std ::cerr << " Error linking " << program << " : " << log << std ::endl;
-			return false;
-		}
-		return true; 
-
 		// _geometryPassProgram
 		_geometryPassProgram = glCreateProgram();
 		glAttachShader( _geometryPassProgram, fragmentShader );
@@ -92,11 +74,11 @@ namespace M3D_ISICG
 			std ::cerr << " Error linking " << _geometryPassProgram << " : " << log << std ::endl;
 			return false;
 		}
-		return true;
 
 		// _shadingPassProgram
 		_shadingPassProgram = glCreateProgram();
 		glAttachShader( _shadingPassProgram, shadingPassShader );
+		glAttachShader( _shadingPassProgram, vertexShader );
 		glLinkProgram( _shadingPassProgram );
 
 		// Check if link is ok.
@@ -109,33 +91,34 @@ namespace M3D_ISICG
 			std ::cerr << " Error linking " << _shadingPassProgram << " : " << log << std ::endl;
 			return false;
 		}
-		return true;
 
 		glDeleteShader( fragmentShader );
 		glDeleteShader( vertexShader );
+		glDeleteShader( shadingPassShader );
 
 		Sponza.load( "Sponza", "data/models/sponza/sponza.obj" );
 
-		glUseProgram( program );
+		glUseProgram( _geometryPassProgram );
 
 		// Dans la fonction init, recuperez l'adresse de cette variable via la fonction glGetUniformLocation et
 		// stockez-la comme attribut de la classe LabWork6.
-		locLum = glGetUniformLocation( program, "luminosite" );
+		locLum = glGetUniformLocation( _geometryPassProgram, "luminosite" );
 		// Matrice model view projection
-		MVP = glGetUniformLocation( program, "uMVPMatrix" );
+		MVP = glGetUniformLocation( _geometryPassProgram, "uMVPMatrix" );
 		// Matrice model view
-		MV = glGetUniformLocation( program, "uMVMatrix" );
+		MV = glGetUniformLocation( _geometryPassProgram, "uMVMatrix" );
 		// Matrice normale
-		normalMatrix = glGetUniformLocation( program, "uNormalMatrix" );
+		normalMatrix = glGetUniformLocation( _geometryPassProgram, "uNormalMatrix" );
 		// position de la lumière
-		lightPos = glGetUniformLocation( program, "lightPos" );
+		lightPos = glGetUniformLocation( _geometryPassProgram, "lightPos" );
 		// Initialisation luminosite et couleur
-		glProgramUniform1f( program, locLum, luminosite );
+		glProgramUniform1f( _geometryPassProgram, locLum, luminosite );
 		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 		// Initialisation Matrice modèle
 		mMatrix = glm::scale( MAT4F_ID, glm::vec3( 0.01f ) );
 
 		_initCamera();
+		initGBuffer();
 
 		std::cout << "Done!" << std::endl;
 		return true;
@@ -153,10 +136,10 @@ namespace M3D_ISICG
 		MVPMatrix		= _camera.getProjectionMatrix() * _camera.getViewMatrix() * mMatrix;
 		MVMatrix		= _camera.getViewMatrix() * mMatrix;
 		Mat4f normalMat = glm::transpose( glm::inverse( MVMatrix ) );
-		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
-		glProgramUniformMatrix4fv( program, MV, 1, 0, glm::value_ptr( MVMatrix ) );
-		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
-		glProgramUniform3fv( program, lightPos, 1, glm::value_ptr( VEC3F_ZERO ) );
+		glProgramUniformMatrix4fv( _geometryPassProgram, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
+		glProgramUniformMatrix4fv( _geometryPassProgram, MV, 1, 0, glm::value_ptr( MVMatrix ) );
+		glProgramUniformMatrix4fv( _geometryPassProgram, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
+		glProgramUniform3fv( _geometryPassProgram, lightPos, 1, glm::value_ptr( VEC3F_ZERO ) );
 		_geometryPass();	
 		_shadingPass();		
 	}
@@ -209,7 +192,7 @@ namespace M3D_ISICG
 		ImGui::Begin( "Settings lab work 1" );
 		ImGui::Text( "No setting available!" );
 		if ( ImGui::SliderFloat( "Couleur Cube", &luminosite, 0.0f, 1.0f ) )
-			glProgramUniform1f( program, locLum, luminosite );
+			glProgramUniform1f( _geometryPassProgram, locLum, luminosite );
 		if ( ImGui::ColorEdit3( "Couleur Fond", glm::value_ptr( _bgColor ) ) )
 			glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 		if ( ImGui::SliderFloat( "fovy", &fovy, 60.0f, 120.0f ) )
@@ -227,12 +210,12 @@ namespace M3D_ISICG
 
 	void LabWork6::_updateViewMatrix()
 	{
-		glProgramUniformMatrix4fv( program, viewMatrix, 1, 0, glm::value_ptr( _camera.getViewMatrix() ) );
+		glProgramUniformMatrix4fv( _geometryPassProgram, viewMatrix, 1, 0, glm::value_ptr( _camera.getViewMatrix() ) );
 	}
 
 	void LabWork6::_updateProjMatrix()
 	{
-		glProgramUniformMatrix4fv( program, projMatrix, 1, 0, glm::value_ptr( _camera.getProjectionMatrix() ) );
+		glProgramUniformMatrix4fv( _geometryPassProgram, projMatrix, 1, 0, glm::value_ptr( _camera.getProjectionMatrix() ) );
 	}
 
 	void LabWork6::_initCamera() 
@@ -250,37 +233,22 @@ namespace M3D_ISICG
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
 								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };		
 
-		for (int i = 0; i < 6; i++) 
+		for ( int i = 0; i < 6; i++ )
 		{
-
 			// Create a texture on the GPU.
 			glCreateTextures( GL_TEXTURE_2D, 1, &_gBufferTextures[ i ] );
-
-			// Setup the texture format.
-			if (i == 5) // Profondeur
-			{
-				glTextureStorage2D( _gBufferTextures[ i ], 1, GL_DEPTH_COMPONENT32F, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() );
-			}
-			else
-			{
-				glTextureStorage2D( _gBufferTextures[ i ], 1, GL_RGBA32F, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight() );
-			}
-			
-			glTextureParameteri( _gBufferTextures[ i ], GL_TEXTURE_WRAP_S, GL_REPEAT );
-			glTextureParameteri( _gBufferTextures[ i ], GL_TEXTURE_WRAP_T, GL_REPEAT );
-			glTextureParameteri( _gBufferTextures[ i ], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-			glTextureParameteri( _gBufferTextures[ i ], GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-			// Fill the texture.
-			glTextureSubImage2D( _gBufferTextures[ i ], 0, 0, 0, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight(), GL_RGBA, GL_UNSIGNED_BYTE, nullptr );
-			glGenerateTextureMipmap( _gBufferTextures[ i ] );
-
-			// Liaison texture FBO
-			glNamedFramebufferTexture( fboId, drawBuffers[ i ], _gBufferTextures[ i ], 1 );
+			glNamedFramebufferTexture( fboId, drawBuffers[ i ], _gBufferTextures[ i ], 0 );
 		}
-
+			
+		glTextureStorage2D( _gBufferTextures[ 0 ], 1, GL_RGBA32F, getWindowWidth(), getWindowHeight() );
+		glTextureStorage2D( _gBufferTextures[ 1 ], 1, GL_RGBA32F, getWindowWidth(), getWindowHeight() );
+		glTextureStorage2D( _gBufferTextures[ 2 ], 1, GL_RGBA8, getWindowWidth(), getWindowHeight() );
+		glTextureStorage2D( _gBufferTextures[ 3 ], 1, GL_RGBA8, getWindowWidth(), getWindowHeight() );
+		glTextureStorage2D( _gBufferTextures[ 4 ], 1, GL_RGBA8, getWindowWidth(), getWindowHeight() );
+		glTextureStorage2D( _gBufferTextures[ 5 ], 1, GL_DEPTH_COMPONENT32F, getWindowWidth(), getWindowHeight() );
+		
 		glNamedFramebufferDrawBuffers( fboId, 5, drawBuffers );
-		glCheckNamedFramebufferStatus;
+		glCheckNamedFramebufferStatus( fboId, GL_FRAMEBUFFER );
 	}
 
 	void LabWork6::_geometryPass()
@@ -291,20 +259,15 @@ namespace M3D_ISICG
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, fboId );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		Sponza.render( _geometryPassProgram );
-
-		// Copie d'1 texture
-		glNamedFramebufferReadBuffer( fboId, drawBuffers[ 0 ] );
-		glBlitNamedFramebuffer( fboId, 0, 0, 0, BaseLabWork::getWindowWidth(), BaseLabWork::getWindowHeight(), 0, 0, BaseLabWork::getWindowWidth(), 
-			BaseLabWork::getWindowHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 	}
 
 	void LabWork6::_shadingPass()
 	{
-		glBindVertexArray( vao );
+		glDisable( GL_DEPTH_TEST );
 		glUseProgram( _shadingPassProgram );
 		//  On indique que le FS écrira dans le FB par défaut
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-		glDisable( GL_DEPTH_TEST );
 
 		// texture posFrag
 		glBindTextureUnit( 6, _gBufferTextures[ 0 ] );
@@ -349,13 +312,16 @@ namespace M3D_ISICG
 		// Liaison EBO VAO
 		glVertexArrayElementBuffer( vao, ebo );
 
+		glBindVertexArray( vao );
 		glDrawElements( GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0 );
+
 		glBindVertexArray( 0 );
-		glBindTextureUnit( 0, 0 );
-		glBindTextureUnit( 1, 0 );
-		glBindTextureUnit( 2, 0 );
-		glBindTextureUnit( 3, 0 );
-		glBindTextureUnit( 4, 0 );
+		glBindTextureUnit( 6, 0 );
+		glBindTextureUnit( 7, 0 );
+		glBindTextureUnit( 8, 0 );
+		glBindTextureUnit( 9, 0 );
+		glBindTextureUnit( 10, 0 );
+		glBindTextureUnit( 11, 0 );
 	}
 
 	void LabWork6::quad()
