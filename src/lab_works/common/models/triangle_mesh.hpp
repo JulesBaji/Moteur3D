@@ -44,26 +44,6 @@ namespace M3D_ISICG
 		Texture _specularMap;
 		Texture _shininessMap;
 		Texture _normalMap;
-
-		// TP6
-		Vec3f	_posFrags = VEC3F_ZERO;
-		Vec3f	_depth = VEC3F_ZERO;
-
-		bool _hasPosFragMap = false;
-		bool _hasDepthMap	= false;
-
-		Texture _posFragsMap;
-		Texture _depthMap;
-
-		Texture _gBufferTextures[ 6 ] = 
-		{ 
-			_posFragsMap,
-			_normalMap,
-			_ambientMap, 
-			_diffuseMap,
-			_specularMap,
-			_depthMap
-		};
 	};
 
 	class TriangleMesh

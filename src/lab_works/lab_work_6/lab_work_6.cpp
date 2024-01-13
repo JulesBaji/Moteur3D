@@ -11,7 +11,6 @@ namespace M3D_ISICG
 
 	LabWork6::~LabWork6()
 	{
-		glDeleteProgram( program );
 		glDeleteProgram( _geometryPassProgram );
 		glDeleteProgram( _shadingPassProgram );
 
@@ -140,7 +139,7 @@ namespace M3D_ISICG
 		glProgramUniformMatrix4fv( _geometryPassProgram, MV, 1, 0, glm::value_ptr( MVMatrix ) );
 		glProgramUniformMatrix4fv( _geometryPassProgram, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
 		glProgramUniform3fv( _geometryPassProgram, lightPos, 1, glm::value_ptr( VEC3F_ZERO ) );
-		_geometryPass();	
+		_geometryPass();
 		_shadingPass();		
 	}
 
@@ -189,7 +188,8 @@ namespace M3D_ISICG
 
 	void LabWork6::displayUI()
 	{
-		ImGui::Begin( "Settings lab work 1" );
+		ImGui::SetWindowSize( ImVec2( 300, 250 ) );
+		ImGui::Begin( "Settings lab work 6" );
 		ImGui::Text( "No setting available!" );
 		if ( ImGui::SliderFloat( "Couleur Cube", &luminosite, 0.0f, 1.0f ) )
 			glProgramUniform1f( _geometryPassProgram, locLum, luminosite );
@@ -197,14 +197,40 @@ namespace M3D_ISICG
 			glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 		if ( ImGui::SliderFloat( "fovy", &fovy, 60.0f, 120.0f ) )
 			_camera.setFovy( fovy );
-		/*ImGui::BeginListBox( "test", ImVec2( 100, 100 ) );
+		
+		ImGui::Text("Select Texture:");
 
-		 for ( int i = 0; i < 6; i++ )
-		 {
+		const char * items[]
+			= { "Positions",
+				"Normales",
+				"Lumiere ambiante",
+				"Lumiere diffuse", 
+				"Lumiere speculaire" };
 
-		 }
+		static int currentItem = 0;
 
-		ImGui::EndListBox();*/
+		if (ImGui::ListBox("##TextureList", &currentItem, items, IM_ARRAYSIZE(items), 5))
+		{
+			// User selected a texture, perform the corresponding actions
+			switch (currentItem)
+			{
+			case 0:
+				textureChoisie =  GL_COLOR_ATTACHMENT0;
+				break;
+			case 1: 
+				textureChoisie = GL_COLOR_ATTACHMENT1;
+				break;
+			case 2: 
+				textureChoisie = GL_COLOR_ATTACHMENT2;
+				break;
+			case 3: 
+				textureChoisie = GL_COLOR_ATTACHMENT3;
+				break;
+			case 4: 
+				textureChoisie = GL_COLOR_ATTACHMENT4;
+				break;
+			}
+		}
 		ImGui::End();		
 	}
 
@@ -231,22 +257,31 @@ namespace M3D_ISICG
 		glCreateFramebuffers( 1, &fboId );
 
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
-								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };		
+								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };	
 
-		for ( int i = 0; i < 6; i++ )
+		// Niveau de mipmap
+		//GLint mipmapLevels = std::floor( std::log2( std::max( getWindowWidth(), getWindowHeight() ) ) );
+
+		// la profondeur affiche tout en noir alors je mets jusqu'a 5
+		for ( int i = 0; i < 5; i++ )
 		{
 			// Create a texture on the GPU.
+			// A faire : Notez qu’il est possible de créer plusieurs textures en un appel
 			glCreateTextures( GL_TEXTURE_2D, 1, &_gBufferTextures[ i ] );
+
+			// Configuration de l'objet
+			if ( i == 5 )
+				glTextureStorage2D(
+					_gBufferTextures[ i ], 1, GL_DEPTH_COMPONENT32F, getWindowWidth(), getWindowHeight() );
+			else
+				glTextureStorage2D( 
+					_gBufferTextures[ i ], 1, GL_RGBA32F, getWindowWidth(), getWindowHeight() );
+			
+			// Liaison texture/FBO
 			glNamedFramebufferTexture( fboId, drawBuffers[ i ], _gBufferTextures[ i ], 0 );
 		}
-			
-		glTextureStorage2D( _gBufferTextures[ 0 ], 1, GL_RGBA32F, getWindowWidth(), getWindowHeight() );
-		glTextureStorage2D( _gBufferTextures[ 1 ], 1, GL_RGBA32F, getWindowWidth(), getWindowHeight() );
-		glTextureStorage2D( _gBufferTextures[ 2 ], 1, GL_RGBA8, getWindowWidth(), getWindowHeight() );
-		glTextureStorage2D( _gBufferTextures[ 3 ], 1, GL_RGBA8, getWindowWidth(), getWindowHeight() );
-		glTextureStorage2D( _gBufferTextures[ 4 ], 1, GL_RGBA8, getWindowWidth(), getWindowHeight() );
-		glTextureStorage2D( _gBufferTextures[ 5 ], 1, GL_DEPTH_COMPONENT32F, getWindowWidth(), getWindowHeight() );
-		
+
+		// 5 ou 6 ?
 		glNamedFramebufferDrawBuffers( fboId, 5, drawBuffers );
 		glCheckNamedFramebufferStatus( fboId, GL_FRAMEBUFFER );
 	}
@@ -259,7 +294,10 @@ namespace M3D_ISICG
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, fboId );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		Sponza.render( _geometryPassProgram );
-		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		//glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		glNamedFramebufferReadBuffer(fboId, textureChoisie);
+		glBlitNamedFramebuffer(fboId, 0, 0, 0, getWindowWidth(), getWindowHeight(),
+									0, 0, getWindowWidth(), getWindowHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
 
 	void LabWork6::_shadingPass()
@@ -270,17 +308,17 @@ namespace M3D_ISICG
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 
 		// texture posFrag
-		glBindTextureUnit( 6, _gBufferTextures[ 0 ] );
+		glBindTextureUnit( 5, _gBufferTextures[ 0 ] );
 		// texture normales
-		glBindTextureUnit( 7, _gBufferTextures[ 1 ] );
+		glBindTextureUnit( 6, _gBufferTextures[ 1 ] );
 		// texture ambiante
-		glBindTextureUnit( 8, _gBufferTextures[ 2 ] );
+		glBindTextureUnit( 7, _gBufferTextures[ 2 ] );
 		// texture diffuse
-		glBindTextureUnit( 9, _gBufferTextures[ 3 ] );
+		glBindTextureUnit( 8, _gBufferTextures[ 3 ] );
 		// texture spéculaire
-		glBindTextureUnit( 10, _gBufferTextures[ 4 ] );
+		glBindTextureUnit( 9, _gBufferTextures[ 4 ] );
 		// texture depth
-		glBindTextureUnit( 11, _gBufferTextures[ 5 ] );
+		glBindTextureUnit( 10, _gBufferTextures[ 5 ] );
 
 		// Reprise du TP2
 		quad();
@@ -316,12 +354,12 @@ namespace M3D_ISICG
 		glDrawElements( GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0 );
 
 		glBindVertexArray( 0 );
+		glBindTextureUnit( 5, 0 );
 		glBindTextureUnit( 6, 0 );
 		glBindTextureUnit( 7, 0 );
 		glBindTextureUnit( 8, 0 );
 		glBindTextureUnit( 9, 0 );
 		glBindTextureUnit( 10, 0 );
-		glBindTextureUnit( 11, 0 );
 	}
 
 	void LabWork6::quad()

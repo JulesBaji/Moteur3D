@@ -30,41 +30,20 @@ void main()
 		alphaDiffuseTexture = texture(uDiffuseMap, texCoords).w;
 		if (alphaDiffuseTexture <= 0.5) discard;
 	}
-	else
-	{
-		diffuseTexture = diffuse;
-	}
+	else diffuseTexture = diffuse;
 
-	if (uHasAmbientMap) 
-	{
-		ambientTexture = vec3(texture(uAmbientMap, texCoords));
-	}
-	else
-	{
-		ambientTexture = ambient;
-	}
+	if (uHasAmbientMap) ambientTexture = texture(uAmbientMap, texCoords).xyz;
+	else ambientTexture = ambient;
 
-	if (uHasShininesseMap) 
-	{
-		shininessTexture = texture(uShininessMap, texCoords).x;
-	}
-	else
-	{
-		shininessTexture = shininess;
-	}
+	if (uHasShininesseMap) shininessTexture = texture(uShininessMap, texCoords).x;
+	else shininessTexture = shininess;
 
-	if (uHasSpecularMap) 
-	{
-		specularTexture = texture(uSpecularMap, texCoords).xxx;
-	}
-	else
-	{
-		specularTexture = specular;
-	}
+	if (uHasSpecularMap) specularTexture = texture(uSpecularMap, texCoords).xxx;
+	else specularTexture = specular;
 
-	fragPosition = vec4( fragPos, 1.0 );
-	fragNormal = vec4( normal, 1.0 );
-	fragAmbient = vec4( ambientTexture, 1.0 );
+	fragPosition = vec4( fragPos, 1.f );
+	fragNormal = vec4( normal, 1.f );
+	fragAmbient = vec4( ambientTexture, 1.f );
 	fragDiffuse = vec4( alphaDiffuseTexture );
 	fragSpecular = vec4( specularTexture, shininessTexture );
 }
