@@ -62,7 +62,7 @@ namespace M3D_ISICG
 		float luminosite = 1.0f;
 		Camera _camera;
 		float  fovy = 60.f;
-		std::vector<GLuint> _gBufferTextures;
+		GLuint _gBufferTextures[6];
 		// Dans le .hpp
 		float _cameraSpeed		 = 0.1f;
 		float _cameraSensitivity = 0.1f;

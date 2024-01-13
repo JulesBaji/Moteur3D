@@ -13,22 +13,10 @@ uniform mat4 uMVPMatrix; //  Model * View * Projection
 uniform mat4 uMVMatrix; // Model * View
 uniform mat4 uNormalMatrix;
 
-out VS_OUT {
-	vec3 Ptangent;
-	vec3 Ltangent;
-} vs_out; 
-
 void main()
 {
     gl_Position = uMVPMatrix * vec4( aVertexPosition, 1.f );
     normal = vec3( uNormalMatrix * vec4(aVertexNormal, 1.f));
     fragPos = vec3( uMVMatrix * vec4(aVertexPosition, 1.f));
     texCoords = aVertexTexCoords;
-	vec3 T			 = normalize( vec3( uNormalMatrix * vec4( aVertexTangent, 1.f ) ) );
-	vec3 N			 = normalize( normal );
-	T				 = normalize( T - dot( T, N ) * N ); // On veut T orthogonal a N
-	vec3 B			 = cross( N, T );
-	mat3 inv_TBN	 = transpose( mat3( T, B, N ) );
-	vs_out.Ptangent	 = inv_TBN * fragPos;
-	vs_out.Ltangent	 = inv_TBN * lightPos;
 }
