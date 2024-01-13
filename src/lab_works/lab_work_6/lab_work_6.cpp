@@ -70,7 +70,7 @@ namespace M3D_ISICG
 		{
 			GLchar log[ 1024 ];
 			glGetProgramInfoLog( _geometryPassProgram, sizeof( log ), NULL, log );
-			std ::cerr << " Error linking " << _geometryPassProgram << " : " << log << std ::endl;
+			std ::cerr << " Error linking _geometryPassProgram : " << log << std ::endl;
 			return false;
 		}
 
@@ -87,7 +87,7 @@ namespace M3D_ISICG
 		{
 			GLchar log[ 1024 ];
 			glGetProgramInfoLog( _shadingPassProgram, sizeof( log ), NULL, log );
-			std ::cerr << " Error linking " << _shadingPassProgram << " : " << log << std ::endl;
+			std ::cerr << " Error linking _shadingPassProgram : " << log << std ::endl;
 			return false;
 		}
 
@@ -220,7 +220,6 @@ namespace M3D_ISICG
 	{
 		ImGui::SetWindowSize( ImVec2( 300, 250 ) );
 		ImGui::Begin( "Settings lab work 6" );
-		ImGui::Text( "No setting available!" );
 		if ( ImGui::SliderFloat( "Couleur Cube", &luminosite, 0.0f, 1.0f ) )
 			glProgramUniform1f( _geometryPassProgram, locLum, luminosite );
 		if ( ImGui::ColorEdit3( "Couleur Fond", glm::value_ptr( _bgColor ) ) )
@@ -228,7 +227,7 @@ namespace M3D_ISICG
 		if ( ImGui::SliderFloat( "fovy", &fovy, 60.0f, 120.0f ) )
 			_camera.setFovy( fovy );
 		
-		ImGui::Text("Select Texture:");
+		ImGui::Text("Choisir une texture:");
 
 		const char * items[]
 			= { "Positions",
@@ -281,7 +280,6 @@ namespace M3D_ISICG
 		_camera.setFovy( fovy );
 	}
 
-	// TP6 : frameBuffer
 	void LabWork6::initGBuffer()
 	{
 		glCreateFramebuffers( 1, &fboId );
@@ -310,8 +308,9 @@ namespace M3D_ISICG
 			glNamedFramebufferTexture( fboId, drawBuffers[ i ], _gBufferTextures[ i ], 0 );
 		}
 
-		// 5 ou 6 ?
+		// Associer les textures à la sortie du fragment shader
 		glNamedFramebufferDrawBuffers( fboId, 5, drawBuffers );
+		// Contrôler la validité du FBO
 		glCheckNamedFramebufferStatus( fboId, GL_FRAMEBUFFER );
 	}
 
@@ -331,12 +330,14 @@ namespace M3D_ISICG
 
 	void LabWork6::_shadingPass()
 	{
+		// On commence par désactiver le test de profondeur
 		glDisable( GL_DEPTH_TEST );
-		glUseProgram( _shadingPassProgram );
 		//  On indique que le FS écrira dans le FB par défaut
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		glUseProgram( _shadingPassProgram );
 
-		// texture posFrag
+		// Passage des textures
+		// texture positions fragments
 		glBindTextureUnit( 5, _gBufferTextures[ 0 ] );
 		// texture normales
 		glBindTextureUnit( 6, _gBufferTextures[ 1 ] );
@@ -346,13 +347,14 @@ namespace M3D_ISICG
 		glBindTextureUnit( 8, _gBufferTextures[ 3 ] );
 		// texture spéculaire
 		glBindTextureUnit( 9, _gBufferTextures[ 4 ] );
-		// texture depth
+		// texture profondeur
 		glBindTextureUnit( 10, _gBufferTextures[ 5 ] );
 
-
 		glBindVertexArray( vao );
+		// Dessin
 		glDrawElements( GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0 );
 
+		// Nettoyage du buffer
 		glBindVertexArray( 0 );
 		glBindTextureUnit( 5, 0 );
 		glBindTextureUnit( 6, 0 );
