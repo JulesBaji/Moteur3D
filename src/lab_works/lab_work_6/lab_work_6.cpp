@@ -119,6 +119,36 @@ namespace M3D_ISICG
 		_initCamera();
 		initGBuffer();
 
+		// Reprise du TP2
+		quad();
+
+		// Création sur GPU
+		glCreateVertexArrays( 1, &vao );
+		glCreateBuffers( 1, &vbo );
+		glCreateBuffers( 1, &ebo );
+
+		// Remplissage du buffer
+		glNamedBufferData( vbo, sommets.size() * sizeof( Vec2f ), sommets.data(), GL_STATIC_DRAW );
+		glNamedBufferData( ebo, indices.size() * sizeof( int ), indices.data(), GL_STATIC_DRAW );
+
+		// Activer les attributs du VAO
+		glEnableVertexArrayAttrib( vao, 0 );
+		glEnableVertexArrayAttrib( vao, 1 );
+
+		// Définir le format de l'attribut
+		glVertexArrayAttribFormat( vao, 0, 2, GL_FLOAT, GL_FALSE, 0 );
+		glVertexArrayAttribFormat( vao, 1, 3, GL_FLOAT, GL_FALSE, 0 );
+
+		// Spécifier le VBO à lire
+		glVertexArrayVertexBuffer( vao, 0, vbo, 0, sizeof( float ) * 2 );
+
+		// Connecter le VAO avec le Vertex Shader
+		glVertexArrayAttribBinding( vao, 0, 0 );
+		glVertexArrayAttribBinding( vao, 1, 1 );
+
+		// Liaison EBO VAO
+		glVertexArrayElementBuffer( vao, ebo );
+
 		std::cout << "Done!" << std::endl;
 		return true;
 	}
@@ -260,10 +290,9 @@ namespace M3D_ISICG
 								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };	
 
 		// Niveau de mipmap
-		//GLint mipmapLevels = std::floor( std::log2( std::max( getWindowWidth(), getWindowHeight() ) ) );
+		GLint mipmapLevels = std::floor( std::log2( std::max( getWindowWidth(), getWindowHeight() ) ) );
 
-		// la profondeur affiche tout en noir alors je mets jusqu'a 5
-		for ( int i = 0; i < 5; i++ )
+		for ( int i = 0; i < 6; i++ )
 		{
 			// Create a texture on the GPU.
 			// A faire : Notez qu’il est possible de créer plusieurs textures en un appel
@@ -272,10 +301,10 @@ namespace M3D_ISICG
 			// Configuration de l'objet
 			if ( i == 5 )
 				glTextureStorage2D(
-					_gBufferTextures[ i ], 1, GL_DEPTH_COMPONENT32F, getWindowWidth(), getWindowHeight() );
+					_gBufferTextures[ i ], mipmapLevels, GL_DEPTH_COMPONENT32F, getWindowWidth(), getWindowHeight() );
 			else
 				glTextureStorage2D( 
-					_gBufferTextures[ i ], 1, GL_RGBA32F, getWindowWidth(), getWindowHeight() );
+					_gBufferTextures[ i ], mipmapLevels, GL_RGBA32F, getWindowWidth(), getWindowHeight() );
 			
 			// Liaison texture/FBO
 			glNamedFramebufferTexture( fboId, drawBuffers[ i ], _gBufferTextures[ i ], 0 );
@@ -294,10 +323,10 @@ namespace M3D_ISICG
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, fboId );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		Sponza.render( _geometryPassProgram );
-		//glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-		glNamedFramebufferReadBuffer(fboId, textureChoisie);
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		/*glNamedFramebufferReadBuffer( fboId, textureChoisie );
 		glBlitNamedFramebuffer(fboId, 0, 0, 0, getWindowWidth(), getWindowHeight(),
-									0, 0, getWindowWidth(), getWindowHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+									0, 0, getWindowWidth(), getWindowHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);*/
 	}
 
 	void LabWork6::_shadingPass()
@@ -320,35 +349,6 @@ namespace M3D_ISICG
 		// texture depth
 		glBindTextureUnit( 10, _gBufferTextures[ 5 ] );
 
-		// Reprise du TP2
-		quad();
-
-		// Création sur GPU
-		glCreateVertexArrays( 1, &vao );
-		glCreateBuffers( 1, &vbo );
-		glCreateBuffers( 1, &ebo );
-
-		// Remplissage du buffer
-		glNamedBufferData( vbo, sommets.size() * sizeof( Vec2f ), sommets.data(), GL_STATIC_DRAW );
-		glNamedBufferData( ebo, indices.size() * sizeof( int ), indices.data(), GL_STATIC_DRAW );
-
-		// Activer les attributs du VAO
-		glEnableVertexArrayAttrib( vao, 0 );
-		glEnableVertexArrayAttrib( vao, 1 );
-
-		// Définir le format de l'attribut
-		glVertexArrayAttribFormat( vao, 0, 2, GL_FLOAT, GL_FALSE, 0 );
-		glVertexArrayAttribFormat( vao, 1, 3, GL_FLOAT, GL_FALSE, 0 );
-
-		// Spécifier le VBO à lire
-		glVertexArrayVertexBuffer( vao, 0, vbo, 0, sizeof( float ) * 2 );
-
-		// Connecter le VAO avec le Vertex Shader
-		glVertexArrayAttribBinding( vao, 0, 0 );
-		glVertexArrayAttribBinding( vao, 1, 1 );
-
-		// Liaison EBO VAO
-		glVertexArrayElementBuffer( vao, ebo );
 
 		glBindVertexArray( vao );
 		glDrawElements( GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0 );
