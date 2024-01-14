@@ -34,8 +34,8 @@ namespace M3D_ISICG
 		// Set the color used by glClear to clear the color buffer (in render()).
 		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 
-		const std::string fragmentShaderStr = readFile( _shaderFolder + "lw1.frag" );
-		const std::string vertexShaderStr	= readFile( _shaderFolder + "lw1.vert" );
+		const std::string fragmentShaderStr = readFile( _shaderFolder + "lw2.frag" );
+		const std::string vertexShaderStr	= readFile( _shaderFolder + "lw2.vert" );
 
 		const GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
 		const GLuint vertexShader	= glCreateShader( GL_VERTEX_SHADER );

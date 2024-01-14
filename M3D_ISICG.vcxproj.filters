@@ -220,10 +220,10 @@
     <None Include="src\lab_works\lab_work_5\shaders\mesh_texture.vert" />
     <None Include="src\lab_works\lab_work_1\shaders\lw1.frag" />
     <None Include="src\lab_works\lab_work_1\shaders\lw1.vert" />
-    <None Include="src\lab_works\lab_work_2\shaders\lw1.frag" />
-    <None Include="src\lab_works\lab_work_2\shaders\lw1.vert" />
-    <None Include="src\lab_works\lab_work_3\shaders\lw1.frag" />
-    <None Include="src\lab_works\lab_work_3\shaders\lw1.vert" />
+    <None Include="src\lab_works\lab_work_2\shaders\lw2.frag" />
+    <None Include="src\lab_works\lab_work_2\shaders\lw2.vert" />
+    <None Include="src\lab_works\lab_work_3\shaders\lw3.frag" />
+    <None Include="src\lab_works\lab_work_3\shaders\lw3.vert" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="x64\Debug\application.obj" />

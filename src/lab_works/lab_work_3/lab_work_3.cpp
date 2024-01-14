@@ -33,8 +33,8 @@ namespace M3D_ISICG
 		// Set the color used by glClear to clear the color buffer (in render()).
 		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 
-		const std::string fragmentShaderStr = readFile( _shaderFolder + "lw1.frag" );
-		const std::string vertexShaderStr	= readFile( _shaderFolder + "lw1.vert" );
+		const std::string fragmentShaderStr = readFile( _shaderFolder + "lw3.frag" );
+		const std::string vertexShaderStr	= readFile( _shaderFolder + "lw3.vert" );
 
 		const GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
 		const GLuint vertexShader	= glCreateShader( GL_VERTEX_SHADER );
@@ -80,7 +80,7 @@ namespace M3D_ISICG
 		glDeleteShader( fragmentShader );
 		glDeleteShader( vertexShader );
 
-		// La fonction la
+		// Initialisations des sommets : positions, indices et couleurs
 		_createCube( _cube );
 
 		// Création sur GPU
@@ -141,16 +141,17 @@ namespace M3D_ISICG
 
 	void LabWork3::animate( const float p_deltaTime ) 
 	{
-		_updateViewMatrix();
-		_updateProjMatrix();
-		_cube.Transformation = glm::rotate( _cube.Transformation, p_deltaTime, glm::vec3( 0.f, 1.0f, 1.f ) );
-		glProgramUniformMatrix4fv( program, modelMatrix, 1, 0, glm::value_ptr( _cube.Transformation ) );
-		MVPMatrix = _camera.getProjectionMatrix() * _camera.getViewMatrix() * _cube.Transformation;
-		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
+		_cube.Transformation = glm::rotate( _cube.Transformation, p_deltaTime, glm::vec3( 0.f, 1.0f, 1.f ) );	
 	}
 
 	void LabWork3::render()
 	{
+		_updateViewMatrix();
+		_updateProjMatrix();
+		glProgramUniformMatrix4fv( program, modelMatrix, 1, 0, glm::value_ptr( _cube.Transformation ) );
+		MVPMatrix = _camera.getProjectionMatrix() * _camera.getViewMatrix() * _cube.Transformation;
+		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
+
 		glBindVertexArray( _cube.vaoMesh );
 		glEnable( GL_DEPTH_TEST );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ); 
@@ -204,7 +205,6 @@ namespace M3D_ISICG
 	void LabWork3::displayUI()
 	{
 		ImGui::Begin( "Settings lab work 3" );
-		ImGui::Text( "No setting available!" );
 		if ( ImGui::SliderFloat( "Couleur Cube", &luminosite, 0.0f, 1.0f ) )
 			glProgramUniform1f( program, locLum, luminosite );
 		if ( ImGui::ColorEdit3( "Couleur Fond", glm::value_ptr( _bgColor ) ) )
