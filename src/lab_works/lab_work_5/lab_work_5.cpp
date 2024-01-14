@@ -90,6 +90,8 @@ namespace M3D_ISICG
 		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 		// Initialisation Matrice modèle
 		mMatrix = glm::scale( MAT4F_ID, glm::vec3( 0.01f ) );
+		// Initialisation lumière
+		glProgramUniform3fv( program, lightPos, 1, glm::value_ptr( VEC3F_ZERO ) );
 
 		_initCamera();
 
@@ -110,7 +112,6 @@ namespace M3D_ISICG
 		glProgramUniformMatrix4fv( program, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
 		glProgramUniformMatrix4fv( program, MV, 1, 0, glm::value_ptr( MVMatrix ) );
 		glProgramUniformMatrix4fv( program, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
-		glProgramUniform3fv( program, lightPos, 1, glm::value_ptr(VEC3F_ZERO) );
 		bunny.render( program );
 	}
 
