@@ -53,6 +53,7 @@ namespace M3D_ISICG
 			glGetShaderInfoLog( vertexShader, sizeof( log ), NULL, log );
 			glDeleteShader( vertexShader );
 			glDeleteShader( fragmentShader );
+			glDeleteShader( shadingPassShader );
 			std ::cerr << " Error compiling vertex shader : " << log << std ::endl;
 			return false;
 		}
@@ -112,6 +113,7 @@ namespace M3D_ISICG
 		lightPos = glGetUniformLocation( _geometryPassProgram, "lightPos" );
 		// Initialisation luminosite et couleur
 		glProgramUniform1f( _geometryPassProgram, locLum, luminosite );
+
 		glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 		// Initialisation Matrice modèle
 		mMatrix = glm::scale( MAT4F_ID, glm::vec3( 0.01f ) );
@@ -159,16 +161,19 @@ namespace M3D_ISICG
 
 	void LabWork6::render()
 	{ 
-		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		//glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
 		_updateViewMatrix();
 		_updateProjMatrix();
 		MVPMatrix		= _camera.getProjectionMatrix() * _camera.getViewMatrix() * mMatrix;
 		MVMatrix		= _camera.getViewMatrix() * mMatrix;
 		Mat4f normalMat = glm::transpose( glm::inverse( MVMatrix ) );
+
 		glProgramUniformMatrix4fv( _geometryPassProgram, MVP, 1, 0, glm::value_ptr( MVPMatrix ) );
 		glProgramUniformMatrix4fv( _geometryPassProgram, MV, 1, 0, glm::value_ptr( MVMatrix ) );
 		glProgramUniformMatrix4fv( _geometryPassProgram, normalMatrix, 1, 0, glm::value_ptr( normalMat ) );
 		glProgramUniform3fv( _geometryPassProgram, lightPos, 1, glm::value_ptr( VEC3F_ZERO ) );
+
 		_geometryPass();
 		_shadingPass();		
 	}
@@ -220,8 +225,6 @@ namespace M3D_ISICG
 	{
 		ImGui::SetWindowSize( ImVec2( 300, 250 ) );
 		ImGui::Begin( "Settings lab work 6" );
-		if ( ImGui::SliderFloat( "Couleur Cube", &luminosite, 0.0f, 1.0f ) )
-			glProgramUniform1f( _geometryPassProgram, locLum, luminosite );
 		if ( ImGui::ColorEdit3( "Couleur Fond", glm::value_ptr( _bgColor ) ) )
 			glClearColor( _bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w );
 		if ( ImGui::SliderFloat( "fovy", &fovy, 60.0f, 120.0f ) )
@@ -323,18 +326,21 @@ namespace M3D_ISICG
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		Sponza.render( _geometryPassProgram );
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-		/*glNamedFramebufferReadBuffer( fboId, textureChoisie );
+		if (textureChoisie != GL_INVALID_INDEX)
+		{
+			glNamedFramebufferReadBuffer( fboId, textureChoisie );
 		glBlitNamedFramebuffer(fboId, 0, 0, 0, getWindowWidth(), getWindowHeight(),
-									0, 0, getWindowWidth(), getWindowHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);*/
+									0, 0, getWindowWidth(), getWindowHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}	
 	}
 
 	void LabWork6::_shadingPass()
 	{
 		// On commence par désactiver le test de profondeur
 		glDisable( GL_DEPTH_TEST );
-		//  On indique que le FS écrira dans le FB par défaut
-		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 		glUseProgram( _shadingPassProgram );
+		//  On indique que le FS écrira dans le FB par défaut
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );	
 
 		// Passage des textures
 		// texture positions fragments

@@ -37,5 +37,6 @@ void main()
 	vec4 diffuseColor = dataDiffuse * max( dot( normal, lightDir ), 0.f );
 	vec4 specularColor = dataSpecular * pow(max(dot(viewDir, reflectDir), 0.f), dataSpecular.w);
 
-	fragColor = dataAmbient + diffuseColor + specularColor;
+	//fragColor = dataAmbient + diffuseColor + specularColor;
+	fragColor = vec4(1.f,0.f,0.f,0.f);
 }

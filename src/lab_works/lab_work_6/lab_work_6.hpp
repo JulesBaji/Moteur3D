@@ -55,6 +55,12 @@ namespace M3D_ISICG
 		GLuint			   vao	 = GL_INVALID_INDEX;
 		GLuint			   ebo	 = GL_INVALID_INDEX;
 		GLenum			   textureChoisie = GL_INVALID_INDEX;
+
+		GLint locLum2	   = GL_INVALID_INDEX;
+		GLint MVP2		   = GL_INVALID_INDEX;
+		GLint MV2		   = GL_INVALID_INDEX;
+		GLint normalMatrix2 = GL_INVALID_INDEX;
+		GLint lightPos2 = GL_INVALID_INDEX;
 		// ================
 		
 		// ================ Settings.
