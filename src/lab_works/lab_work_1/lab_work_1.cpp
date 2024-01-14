@@ -95,9 +95,10 @@ namespace M3D_ISICG
 
 	void LabWork1::render() 
 	{ 
-		glClear( GL_COLOR_BUFFER_BIT );
-		glDrawArrays( GL_TRIANGLES, 0, 3 );
+		glClear( GL_COLOR_BUFFER_BIT );	
 		glBindVertexArray( VAOIdentifiant );
+		glDrawArrays( GL_TRIANGLES, 0, 3 );
+		glBindVertexArray( 0 );
 	}
 
 	void LabWork1::handleEvents( const SDL_Event & p_event )
