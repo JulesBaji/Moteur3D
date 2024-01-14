@@ -31,37 +31,16 @@ void main()
 		alphaDiffuseTexture = texture(uDiffuseMap, texCoords).w;
 		if (alphaDiffuseTexture <= 0.5) discard;
 	}
-	else
-	{
-		diffuseTexture = diffuse;
-	}
+	else diffuseTexture = diffuse;
 
-	if (uHasAmbientMap) 
-	{
-		ambientTexture = vec3(texture(uAmbientMap, texCoords));
-	}
-	else
-	{
-		ambientTexture = ambient;
-	}
+	if (uHasAmbientMap) ambientTexture = vec3(texture(uAmbientMap, texCoords));
+	else ambientTexture = ambient;
 
-	if (uHasShininesseMap) 
-	{
-		shininessTexture = texture(uShininessMap, texCoords).x;
-	}
-	else
-	{
-		shininessTexture = shininess;
-	}
+	if (uHasShininesseMap) shininessTexture = texture(uShininessMap, texCoords).x;
+	else shininessTexture = shininess;
 
-	if (uHasSpecularMap) 
-	{
-		specularTexture = texture(uSpecularMap, texCoords).xxx;
-	}
-	else
-	{
-		specularTexture = specular;
-	}
+	if (uHasSpecularMap) specularTexture = texture(uSpecularMap, texCoords).xxx;
+	else specularTexture = specular;
 
 	vec3 lightDir, viewDir, N;
 	if ( uHasNormalMap )

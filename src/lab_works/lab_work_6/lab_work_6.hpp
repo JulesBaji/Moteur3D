@@ -23,8 +23,6 @@ namespace M3D_ISICG
 
 		void handleEvents( const SDL_Event & p_event ) override;
 		void displayUI() override;
-		void _updateViewMatrix();
-		void _updateProjMatrix();
 		void _initCamera();
 
 		// TP6
@@ -46,21 +44,13 @@ namespace M3D_ISICG
 		GLint			   MVP = GL_INVALID_INDEX;
 		GLint			   MV					  = GL_INVALID_INDEX;
 		GLint			   normalMatrix			  = GL_INVALID_INDEX;
-		GLint			   viewMatrix			  = GL_INVALID_INDEX;
-		GLint			   projMatrix			  = GL_INVALID_INDEX;
 		GLint			   lightPos				  = GL_INVALID_INDEX;
-		//TP6
+
 		GLuint			   fboId = GL_INVALID_INDEX;
 		GLuint			   vbo	 = GL_INVALID_INDEX;
 		GLuint			   vao	 = GL_INVALID_INDEX;
 		GLuint			   ebo	 = GL_INVALID_INDEX;
 		GLenum			   textureChoisie = GL_INVALID_INDEX;
-
-		GLint locLum2	   = GL_INVALID_INDEX;
-		GLint MVP2		   = GL_INVALID_INDEX;
-		GLint MV2		   = GL_INVALID_INDEX;
-		GLint normalMatrix2 = GL_INVALID_INDEX;
-		GLint lightPos2 = GL_INVALID_INDEX;
 		// ================
 		
 		// ================ Settings.
