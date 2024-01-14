@@ -162,9 +162,6 @@ namespace M3D_ISICG
 	void LabWork6::render()
 	{ 
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-		_updateViewMatrix();
-		_updateProjMatrix();
 		MVPMatrix		= _camera.getProjectionMatrix() * _camera.getViewMatrix() * mMatrix;
 		MVMatrix		= _camera.getViewMatrix() * mMatrix;
 		Mat4f normalMat = glm::transpose( glm::inverse( MVMatrix ) );
@@ -185,28 +182,22 @@ namespace M3D_ISICG
 			switch ( p_event.key.keysym.scancode )
 			{
 			case SDL_SCANCODE_W: // Front
-				_camera.moveFront( _cameraSpeed );
-				_updateViewMatrix();
+				_camera.moveFront( _cameraSpeed );				
 				break;
 			case SDL_SCANCODE_S: // Back
-				_camera.moveFront( -_cameraSpeed );
-				_updateViewMatrix();
+				_camera.moveFront( -_cameraSpeed );				
 				break;
 			case SDL_SCANCODE_A: // Left
-				_camera.moveRight( -_cameraSpeed );
-				_updateViewMatrix();
+				_camera.moveRight( -_cameraSpeed );				
 				break;
 			case SDL_SCANCODE_D: // Right
-				_camera.moveRight( _cameraSpeed );
-				_updateViewMatrix();
+				_camera.moveRight( _cameraSpeed );				
 				break;
 			case SDL_SCANCODE_R: // Up
-				_camera.moveUp( _cameraSpeed );
-				_updateViewMatrix();
+				_camera.moveUp( _cameraSpeed );				
 				break;
 			case SDL_SCANCODE_F: // Bottom
-				_camera.moveUp( -_cameraSpeed );
-				_updateViewMatrix();
+				_camera.moveUp( -_cameraSpeed );			
 				break;
 			default: break;
 			}
@@ -216,8 +207,7 @@ namespace M3D_ISICG
 		if ( p_event.type == SDL_MOUSEMOTION && p_event.motion.state & SDL_BUTTON_LMASK
 			 && !ImGui::GetIO().WantCaptureMouse )
 		{
-			_camera.rotate( p_event.motion.xrel * _cameraSensitivity, p_event.motion.yrel * _cameraSensitivity );
-			_updateViewMatrix();
+			_camera.rotate( p_event.motion.xrel * _cameraSensitivity, p_event.motion.yrel * _cameraSensitivity );		
 		}
 	}
 
@@ -268,16 +258,6 @@ namespace M3D_ISICG
 			}
 		}
 		ImGui::End();		
-	}
-
-	void LabWork6::_updateViewMatrix()
-	{
-		glProgramUniformMatrix4fv( _geometryPassProgram, viewMatrix, 1, 0, glm::value_ptr( _camera.getViewMatrix() ) );
-	}
-
-	void LabWork6::_updateProjMatrix()
-	{
-		glProgramUniformMatrix4fv( _geometryPassProgram, projMatrix, 1, 0, glm::value_ptr( _camera.getProjectionMatrix() ) );
 	}
 
 	void LabWork6::_initCamera() 

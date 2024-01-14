@@ -23,8 +23,6 @@ namespace M3D_ISICG
 
 		void handleEvents( const SDL_Event & p_event ) override;
 		void displayUI() override;
-		void _updateViewMatrix();
-		void _updateProjMatrix();
 		void _initCamera();
 
 	  private:
@@ -37,8 +35,6 @@ namespace M3D_ISICG
 		GLint  MVP			= GL_INVALID_INDEX;
 		GLint  MV			= GL_INVALID_INDEX;
 		GLint  normalMatrix = GL_INVALID_INDEX;
-		GLint  viewMatrix	= GL_INVALID_INDEX;
-		GLint  projMatrix	= GL_INVALID_INDEX;
 		GLint  lightPos		= GL_INVALID_INDEX;
 		// ================
 		
