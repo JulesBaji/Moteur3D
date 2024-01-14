@@ -17,12 +17,12 @@ void main()
 	ivec2 coord = ivec2(gl_FragCoord.xy);
 
 	// Données des textures
-	vec4 dataPos = texelFetch( uPosFragsMap, coord, 0 );
-	vec4 dataNormal = texelFetch( uNormalMap, coord, 0 );
-	vec4 dataAmbient = texelFetch( uAmbientMap, coord, 0 );
-	vec4 dataDiffuse = texelFetch( uDiffuseMap, coord, 0 );
-	vec4 dataSpecular = texelFetch( uSpecularMap, coord, 0 );
-	vec4 dataDepth = texelFetch( uDepthMap, coord, 0 );
+	vec4 dataPos = vec4(texelFetch( uPosFragsMap, coord, 0).xyz, 0);
+	vec4 dataNormal = vec4(texelFetch( uNormalMap, coord, 0).xyz, 0);
+	vec4 dataAmbient = vec4(texelFetch( uAmbientMap, coord, 0).xyz, 0);
+	vec4 dataDiffuse = vec4(texelFetch( uDiffuseMap, coord, 0).xyz, 0);
+	vec4 dataSpecular = vec4(texelFetch( uSpecularMap, coord, 0).xyz, 0);
+	vec4 dataDepth = vec4(texelFetch( uDepthMap, coord, 0).xyz, 0);
 
 	vec4 lightDir, viewDir;
 
@@ -37,6 +37,5 @@ void main()
 	vec4 diffuseColor = dataDiffuse * max( dot( normal, lightDir ), 0.f );
 	vec4 specularColor = dataSpecular * pow(max(dot(viewDir, reflectDir), 0.f), dataSpecular.w);
 
-	//fragColor = dataAmbient + diffuseColor + specularColor;
-	fragColor = vec4(1.f,0.f,0.f,0.f);
+	fragColor = dataAmbient + diffuseColor + specularColor;
 }

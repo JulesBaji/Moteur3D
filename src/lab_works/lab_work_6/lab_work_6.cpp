@@ -161,7 +161,7 @@ namespace M3D_ISICG
 
 	void LabWork6::render()
 	{ 
-		//glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 		_updateViewMatrix();
 		_updateProjMatrix();
@@ -237,11 +237,12 @@ namespace M3D_ISICG
 				"Normales",
 				"Lumiere ambiante",
 				"Lumiere diffuse", 
-				"Lumiere speculaire" };
+				"Lumiere speculaire", 
+				" Revenir au Shading Pass" };
 
 		static int currentItem = 0;
 
-		if (ImGui::ListBox("##TextureList", &currentItem, items, IM_ARRAYSIZE(items), 5))
+		if (ImGui::ListBox("##TextureList", &currentItem, items, IM_ARRAYSIZE(items), 6))
 		{
 			// User selected a texture, perform the corresponding actions
 			switch (currentItem)
@@ -260,6 +261,9 @@ namespace M3D_ISICG
 				break;
 			case 4: 
 				textureChoisie = GL_COLOR_ATTACHMENT4;
+				break;
+			case 5: 
+				textureChoisie = GL_INVALID_INDEX;
 				break;
 			}
 		}
@@ -288,7 +292,7 @@ namespace M3D_ISICG
 		glCreateFramebuffers( 1, &fboId );
 
 		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
-								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_DEPTH_ATTACHMENT };	
+								 GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };	
 
 		// Niveau de mipmap
 		GLint mipmapLevels = std::floor( std::log2( std::max( getWindowWidth(), getWindowHeight() ) ) );
@@ -325,13 +329,14 @@ namespace M3D_ISICG
 		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, fboId );
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		Sponza.render( _geometryPassProgram );
-		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+		// retour visuel : On sélectionne le buffer à lire Puis on le copie
 		if (textureChoisie != GL_INVALID_INDEX)
 		{
 			glNamedFramebufferReadBuffer( fboId, textureChoisie );
-		glBlitNamedFramebuffer(fboId, 0, 0, 0, getWindowWidth(), getWindowHeight(),
+			glBlitNamedFramebuffer(fboId, 0, 0, 0, getWindowWidth(), getWindowHeight(),
 									0, 0, getWindowWidth(), getWindowHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}	
+		glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 	}
 
 	void LabWork6::_shadingPass()
