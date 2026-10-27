@@ -9,33 +9,28 @@ layout( binding = 3 ) uniform sampler2D uDiffuseMap;
 layout( binding = 4 ) uniform sampler2D uSpecularMap;
 layout( binding = 5 ) uniform sampler2D uDepthMap;
 
-in vec3 lightPos;
+const vec3 lightPos = vec3( 0.0 ); // light at the camera (view space), as in TP 5
 
 void main()
 {
-	// Données du pixel courant
-	ivec2 coord = ivec2(gl_FragCoord.xy);
+	ivec2 coord = ivec2( gl_FragCoord.xy );
 
-	// Données des textures
-	vec4 dataPos = vec4(texelFetch( uPosFragsMap, coord, 0).xyz, 0);
-	vec4 dataNormal = vec4(texelFetch( uNormalMap, coord, 0).xyz, 0);
-	vec4 dataAmbient = vec4(texelFetch( uAmbientMap, coord, 0).xyz, 0);
-	vec4 dataDiffuse = vec4(texelFetch( uDiffuseMap, coord, 0).xyz, 0);
-	vec4 dataSpecular = vec4(texelFetch( uSpecularMap, coord, 0).xyz, 0);
-	vec4 dataDepth = vec4(texelFetch( uDepthMap, coord, 0).xyz, 0);
+	vec4 pos = texelFetch( uPosFragsMap, coord, 0 );
+	if ( pos.w == 0.0 ) discard; // background: no geometry written here
 
-	vec4 lightDir, viewDir;
+	vec3 fragPos  = pos.xyz;
+	vec3 N        = normalize( texelFetch( uNormalMap, coord, 0 ).xyz );
+	vec3 ambient  = texelFetch( uAmbientMap, coord, 0 ).xyz;
+	vec3 diffuse  = texelFetch( uDiffuseMap, coord, 0 ).xyz;
+	vec4 spec     = texelFetch( uSpecularMap, coord, 0 );
 
-	lightDir = normalize( vec4(lightPos,1.0) - dataPos );
-	viewDir	 = normalize( -dataPos );
+	vec3 lightDir = normalize( lightPos - fragPos );
+	vec3 viewDir  = normalize( -fragPos );
+	if ( dot( N, lightDir ) < 0 ) N = -N;
 
-	vec4 normal = dataNormal;
-	if ( dot( normal, lightDir ) < 0 )
-		normal = -normal;
+	vec3 reflectDir = reflect( -lightDir, N );
+	vec3 diffuseColor  = diffuse * max( dot( N, lightDir ), 0.f );
+	vec3 specularColor = spec.xyz * pow( max( dot( viewDir, reflectDir ), 0.f ), spec.w );
 
-	vec4 reflectDir = reflect( -lightDir, normal );
-	vec4 diffuseColor = dataDiffuse * max( dot( normal, lightDir ), 0.f );
-	vec4 specularColor = dataSpecular * pow(max(dot(viewDir, reflectDir), 0.f), dataSpecular.w);
-
-	fragColor = dataAmbient + diffuseColor + specularColor;
+	fragColor = vec4( ambient + diffuseColor + specularColor, 1.0 );
 }

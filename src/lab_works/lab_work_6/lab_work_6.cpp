@@ -27,6 +27,7 @@ namespace M3D_ISICG
 		const std::string fragmentShaderStr = readFile( _shaderFolder + "geometry_pass.frag" );
 		const std::string vertexShaderStr	= readFile( _shaderFolder + "geometry_pass.vert" );
 		const std::string FragmenshadingPassStr = readFile( _shaderFolder + "shading_pass.frag" );
+		const std::string quadVertStr = readFile( _shaderFolder + "shading_pass.vert" );
 
 		const GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
 		const GLuint vertexShader	= glCreateShader( GL_VERTEX_SHADER );
@@ -78,7 +79,15 @@ namespace M3D_ISICG
 		// _shadingPassProgram
 		_shadingPassProgram = glCreateProgram();
 		glAttachShader( _shadingPassProgram, shadingPassShader );
-		glAttachShader( _shadingPassProgram, vertexShader );
+		{
+			// Le quad plein écran a son propre vertex shader (pas de matrice MVP)
+			const GLuint quadVS = glCreateShader( GL_VERTEX_SHADER );
+			const GLchar * q = quadVertStr.c_str();
+			glShaderSource( quadVS, 1, &q, NULL );
+			glCompileShader( quadVS );
+			glAttachShader( _shadingPassProgram, quadVS );
+			glDeleteShader( quadVS );
+		}
 		glLinkProgram( _shadingPassProgram );
 
 		// Check if link is ok.
@@ -135,8 +144,7 @@ namespace M3D_ISICG
 
 		// Activer les attributs du VAO
 		glEnableVertexArrayAttrib( vao, 0 );
-		glEnableVertexArrayAttrib( vao, 1 );
-
+		
 		// Définir le format de l'attribut
 		glVertexArrayAttribFormat( vao, 0, 2, GL_FLOAT, GL_FALSE, 0 );
 		glVertexArrayAttribFormat( vao, 1, 3, GL_FLOAT, GL_FALSE, 0 );
@@ -292,7 +300,7 @@ namespace M3D_ISICG
 					_gBufferTextures[ i ], mipmapLevels, GL_RGBA32F, getWindowWidth(), getWindowHeight() );
 			
 			// Liaison texture/FBO
-			glNamedFramebufferTexture( fboId, drawBuffers[ i ], _gBufferTextures[ i ], 0 );
+			glNamedFramebufferTexture( fboId, i == 5 ? GL_DEPTH_ATTACHMENT : drawBuffers[ i ], _gBufferTextures[ i ], 0 );
 		}
 
 		// Associer les textures à la sortie du fragment shader
@@ -329,17 +337,17 @@ namespace M3D_ISICG
 
 		// Passage des textures
 		// texture positions fragments
-		glBindTextureUnit( 5, _gBufferTextures[ 0 ] );
+		glBindTextureUnit( 0, _gBufferTextures[ 0 ] );
 		// texture normales
-		glBindTextureUnit( 6, _gBufferTextures[ 1 ] );
+		glBindTextureUnit( 1, _gBufferTextures[ 1 ] );
 		// texture ambiante
-		glBindTextureUnit( 7, _gBufferTextures[ 2 ] );
+		glBindTextureUnit( 2, _gBufferTextures[ 2 ] );
 		// texture diffuse
-		glBindTextureUnit( 8, _gBufferTextures[ 3 ] );
+		glBindTextureUnit( 3, _gBufferTextures[ 3 ] );
 		// texture spéculaire
-		glBindTextureUnit( 9, _gBufferTextures[ 4 ] );
+		glBindTextureUnit( 4, _gBufferTextures[ 4 ] );
 		// texture profondeur
-		glBindTextureUnit( 10, _gBufferTextures[ 5 ] );
+		glBindTextureUnit( 5, _gBufferTextures[ 5 ] );
 
 		glBindVertexArray( vao );
 		// Dessin
@@ -347,12 +355,12 @@ namespace M3D_ISICG
 
 		// Nettoyage du buffer
 		glBindVertexArray( 0 );
+		glBindTextureUnit( 0, 0 );
+		glBindTextureUnit( 1, 0 );
+		glBindTextureUnit( 2, 0 );
+		glBindTextureUnit( 3, 0 );
+		glBindTextureUnit( 4, 0 );
 		glBindTextureUnit( 5, 0 );
-		glBindTextureUnit( 6, 0 );
-		glBindTextureUnit( 7, 0 );
-		glBindTextureUnit( 8, 0 );
-		glBindTextureUnit( 9, 0 );
-		glBindTextureUnit( 10, 0 );
 	}
 
 	void LabWork6::quad()

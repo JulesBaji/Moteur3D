@@ -44,6 +44,6 @@ void main()
 	fragPosition = vec4( fragPos, 1.f );
 	fragNormal = vec4( normal, 1.f );
 	fragAmbient = vec4( ambientTexture, 1.f );
-	fragDiffuse = vec4( alphaDiffuseTexture );
+	fragDiffuse = vec4( diffuseTexture, 1.f );
 	fragSpecular = vec4( specularTexture, shininessTexture );
 }

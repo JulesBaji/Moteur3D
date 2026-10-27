@@ -16,7 +16,7 @@ uniform mat4 uNormalMatrix;
 void main()
 {
     gl_Position = uMVPMatrix * vec4( aVertexPosition, 1.f );
-    normal = vec3( uNormalMatrix * vec4(aVertexNormal, 1.f));
+    normal = normalize( vec3( uNormalMatrix * vec4(aVertexNormal, 0.f)) );
     fragPos = vec3( uMVMatrix * vec4(aVertexPosition, 1.f));
     texCoords = aVertexTexCoords;
 }
