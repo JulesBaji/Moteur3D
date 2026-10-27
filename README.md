@@ -4,9 +4,9 @@ TP d'informatique graphique temps réel du master Informatique ISICG (Universit�
 
 Le projet part d'un squelette fourni par l'université (application SDL2, interface ImGui, gestion des TP). Chaque TP s'ajoute dans `src/lab_works/` et se choisit dans le menu de l'application.
 
-![Traversée de la scène Sponza dans le moteur (scène « Projet »)](docs/moteur3d.gif)
+![Traversée de la scène Sponza dans le moteur (TP 5)](docs/moteur3d.gif)
 
-*Scène « Projet » : Sponza texturé avec normal mapping, lumière placée sur la caméra.*
+*TP 5 : Sponza texturé avec normal mapping, lumière placée sur la caméra.*
 
 ## Contenu
 
